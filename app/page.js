@@ -31,6 +31,7 @@ import {
   Car,
   Bike,
   Clock,
+  Activity,
 } from "lucide-react";
 
 // App Name (Can be changed)
@@ -69,6 +70,56 @@ const sortLoansByDisplayOrder = (loans) => {
     // If neither loan is in the predefined order, maintain original order
     return 0;
   });
+};
+
+// Function to format dates in a user-friendly way
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+// Function to format date periods nicely
+const formatDatePeriod = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // If it's a full year period, show it specially
+  if (
+    start.getMonth() === 0 &&
+    start.getDate() === 1 &&
+    end.getMonth() === 11 &&
+    end.getDate() === 31 &&
+    start.getFullYear() === end.getFullYear()
+  ) {
+    return `Full Year ${start.getFullYear()}`;
+  }
+
+  // If same year, don't repeat the year
+  if (start.getFullYear() === end.getFullYear()) {
+    return `${start.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    })} - ${end.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })}`;
+  }
+
+  // Different years
+  return `${start.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })} - ${end.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`;
 };
 
 // --- Mock Data Structures (Keep existing data structures) ---
@@ -4372,28 +4423,54 @@ function EquityScreen({ navigate, currentUser, userEquities }) {
 
       {/* Statement Header */}
       <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-gray-600">Employee No.</p>
-            <p className="font-semibold text-gray-800">
-              {latestEquity.employeeNo}
-            </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+              <User size={20} className="text-blue-600" />
+            </div>
+            <div>
+              <p className="text-gray-500 text-xs uppercase tracking-wide">
+                Employee No.
+              </p>
+              <p className="font-semibold text-gray-800 text-lg">
+                {latestEquity.employeeNo}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-gray-600">Employee Name</p>
-            <p className="font-semibold text-gray-800">
-              {latestEquity.employeeName}
-            </p>
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+              <User size={20} className="text-green-600" />
+            </div>
+            <div>
+              <p className="text-gray-500 text-xs uppercase tracking-wide">
+                Employee Name
+              </p>
+              <p className="font-semibold text-gray-800 text-lg">
+                {latestEquity.employeeName}
+              </p>
+            </div>
           </div>
         </div>
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-          <p className="text-blue-700 font-semibold text-center">
-            Statement Period: {latestEquity.statementPeriod.startDate} to{" "}
-            {latestEquity.statementPeriod.endDate}
-          </p>
-          <p className="text-blue-600 text-sm text-center mt-1">
-            As of {latestEquity.statementPeriod.asOfDate}
-          </p>
+
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200">
+          <div className="flex items-center justify-center mb-3">
+            <CalendarDays size={24} className="text-blue-600 mr-3" />
+            <h3 className="text-lg font-semibold text-gray-800">
+              Statement Period
+            </h3>
+          </div>
+          <div className="text-center">
+            <p className="text-blue-700 font-bold text-xl mb-1">
+              {formatDatePeriod(
+                latestEquity.statementPeriod.startDate,
+                latestEquity.statementPeriod.endDate
+              )}
+            </p>
+            <p className="text-blue-600 text-sm">
+              Statement as of{" "}
+              {formatDate(latestEquity.statementPeriod.asOfDate)}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -4407,6 +4484,286 @@ function EquityScreen({ navigate, currentUser, userEquities }) {
           <p className="text-blue-100 text-xs mt-2">
             Sum of all ending balance components
           </p>
+        </div>
+      </div>
+
+      {/* Starting Balance Breakdown */}
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-6">
+        <div className="flex items-center mb-4">
+          <TrendingUp size={20} className="text-blue-500 mr-2" />
+          <h2 className="text-lg font-semibold text-gray-800">
+            Starting Balance
+          </h2>
+          <span className="ml-auto text-sm text-gray-500">
+            As of {formatDate(latestEquity.statementPeriod.startDate)}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <p className="text-blue-700 font-medium text-sm mb-2">
+              Your Contributions
+            </p>
+            <p className="text-2xl font-bold text-blue-800">
+              ₱{latestEquity.startingBalance.yourContributions.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-green-50 p-4 rounded-lg">
+            <p className="text-green-700 font-medium text-sm mb-2">
+              Employer Contributions
+            </p>
+            <p className="text-2xl font-bold text-green-800">
+              ₱
+              {latestEquity.startingBalance.employerContributions.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <p className="text-purple-700 font-medium text-sm mb-2">
+              Your Earnings
+            </p>
+            <p className="text-2xl font-bold text-purple-800">
+              ₱{latestEquity.startingBalance.yourEarnings.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-orange-50 p-4 rounded-lg">
+            <p className="text-orange-700 font-medium text-sm mb-2">
+              Employer Earnings
+            </p>
+            <p className="text-2xl font-bold text-orange-800">
+              ₱{latestEquity.startingBalance.employerEarnings.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 font-medium">
+              Total Starting Balance:
+            </span>
+            <span className="text-xl font-bold text-gray-800">
+              ₱{latestEquity.startingBalance.total.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Activity This Period */}
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-6">
+        <div className="flex items-center mb-4">
+          <Activity size={20} className="text-green-500 mr-2" />
+          <h2 className="text-lg font-semibold text-gray-800">
+            Activity This Period
+          </h2>
+          <span className="ml-auto text-sm text-gray-500">
+            {formatDatePeriod(
+              latestEquity.statementPeriod.startDate,
+              latestEquity.statementPeriod.endDate
+            )}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+            <p className="text-blue-700 font-medium text-sm mb-2">
+              New Contributions (You)
+            </p>
+            <p className="text-xl font-bold text-blue-800">
+              +₱
+              {latestEquity.activityThisPeriod.yourNewContributions.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+            <p className="text-green-700 font-medium text-sm mb-2">
+              New Contributions (Employer)
+            </p>
+            <p className="text-xl font-bold text-green-800">
+              +₱
+              {latestEquity.activityThisPeriod.employerNewContributions.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-400">
+            <p className="text-purple-700 font-medium text-sm mb-2">
+              New Earnings (You)
+            </p>
+            <p className="text-xl font-bold text-purple-800">
+              +₱
+              {latestEquity.activityThisPeriod.yourNewEarnings.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-400">
+            <p className="text-orange-700 font-medium text-sm mb-2">
+              New Earnings (Employer)
+            </p>
+            <p className="text-xl font-bold text-orange-800">
+              +₱
+              {latestEquity.activityThisPeriod.employerNewEarnings.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 font-medium">
+              Total Activity This Period:
+            </span>
+            <span className="text-xl font-bold text-green-600">
+              +₱
+              {(
+                latestEquity.activityThisPeriod.yourNewContributions +
+                latestEquity.activityThisPeriod.employerNewContributions +
+                latestEquity.activityThisPeriod.yourNewEarnings +
+                latestEquity.activityThisPeriod.employerNewEarnings
+              ).toLocaleString()}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed Ending Balance */}
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-6">
+        <div className="flex items-center mb-4">
+          <DollarSign size={20} className="text-blue-500 mr-2" />
+          <h2 className="text-lg font-semibold text-gray-800">
+            Ending Balance Breakdown
+          </h2>
+          <span className="ml-auto text-sm text-gray-500">
+            As of {formatDate(latestEquity.statementPeriod.endDate)}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <p className="text-blue-700 font-medium text-sm mb-2">
+              Your Total Contributions
+            </p>
+            <p className="text-2xl font-bold text-blue-800 mb-1">
+              ₱{latestEquity.endingBalance.yourContributions.toLocaleString()}
+            </p>
+            <p className="text-xs text-blue-600">
+              {(
+                (latestEquity.endingBalance.yourContributions /
+                  latestEquity.endingBalance.total) *
+                100
+              ).toFixed(1)}
+              % of total
+            </p>
+          </div>
+          <div className="bg-green-50 p-4 rounded-lg">
+            <p className="text-green-700 font-medium text-sm mb-2">
+              Employer Total Contributions
+            </p>
+            <p className="text-2xl font-bold text-green-800 mb-1">
+              ₱
+              {latestEquity.endingBalance.employerContributions.toLocaleString()}
+            </p>
+            <p className="text-xs text-green-600">
+              {(
+                (latestEquity.endingBalance.employerContributions /
+                  latestEquity.endingBalance.total) *
+                100
+              ).toFixed(1)}
+              % of total
+            </p>
+          </div>
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <p className="text-purple-700 font-medium text-sm mb-2">
+              Your Total Earnings
+            </p>
+            <p className="text-2xl font-bold text-purple-800 mb-1">
+              ₱{latestEquity.endingBalance.yourEarnings.toLocaleString()}
+            </p>
+            <p className="text-xs text-purple-600">
+              {(
+                (latestEquity.endingBalance.yourEarnings /
+                  latestEquity.endingBalance.total) *
+                100
+              ).toFixed(1)}
+              % of total
+            </p>
+          </div>
+          <div className="bg-orange-50 p-4 rounded-lg">
+            <p className="text-orange-700 font-medium text-sm mb-2">
+              Employer Total Earnings
+            </p>
+            <p className="text-2xl font-bold text-orange-800 mb-1">
+              ₱{latestEquity.endingBalance.employerEarnings.toLocaleString()}
+            </p>
+            <p className="text-xs text-orange-600">
+              {(
+                (latestEquity.endingBalance.employerEarnings /
+                  latestEquity.endingBalance.total) *
+                100
+              ).toFixed(1)}
+              % of total
+            </p>
+          </div>
+        </div>
+
+        {/* Summary Insights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-gray-700 font-medium text-sm mb-2">
+              Total Contributions
+            </p>
+            <p className="text-xl font-bold text-gray-800">
+              ₱
+              {(
+                latestEquity.endingBalance.yourContributions +
+                latestEquity.endingBalance.employerContributions
+              ).toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-600">
+              {(
+                ((latestEquity.endingBalance.yourContributions +
+                  latestEquity.endingBalance.employerContributions) /
+                  latestEquity.endingBalance.total) *
+                100
+              ).toFixed(1)}
+              % of total equity
+            </p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-gray-700 font-medium text-sm mb-2">
+              Total Earnings
+            </p>
+            <p className="text-xl font-bold text-gray-800">
+              ₱
+              {(
+                latestEquity.endingBalance.yourEarnings +
+                latestEquity.endingBalance.employerEarnings
+              ).toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-600">
+              {(
+                ((latestEquity.endingBalance.yourEarnings +
+                  latestEquity.endingBalance.employerEarnings) /
+                  latestEquity.endingBalance.total) *
+                100
+              ).toFixed(1)}
+              % of total equity
+            </p>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600 font-medium">
+              Grand Total Ending Balance:
+            </span>
+            <span className="text-2xl font-bold text-blue-600">
+              ₱{latestEquity.endingBalance.total.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-500">Growth this period:</span>
+            <span className="text-green-600 font-medium">
+              +₱
+              {(
+                latestEquity.endingBalance.total -
+                latestEquity.startingBalance.total
+              ).toLocaleString()}
+            </span>
+          </div>
         </div>
       </div>
     </div>
