@@ -87,6 +87,7 @@ const defaultMockUser = {
   department: "College of Engineering",
   dateHired: "2010-06-01",
   contactNumber: "09123456789",
+  netPay: 25000, // Monthly net pay for Regular Loan eligibility
   isActive: true,
   pin: "123456", // Default PIN for existing user
   hasPin: true,
@@ -108,6 +109,7 @@ const newMockUserBaseTemplate = {
   dateOfMembership: "",
   fsClassification: "",
   dateHired: "",
+  netPay: 15000, // Monthly net pay for Regular Loan eligibility
   isActive: true,
   pin: "",
   hasPin: false,
@@ -807,6 +809,14 @@ function App() {
     const storedUserData = localStorage.getItem("currentUserData");
     if (storedIsLoggedIn === "true" && storedUserData) {
       const parsedUser = JSON.parse(storedUserData);
+
+      // Defensive update: Add netPay if missing (for existing logged-in users)
+      if (!parsedUser.netPay) {
+        parsedUser.netPay = parsedUser.id === "user1" ? 25000 : 15000;
+        // Update localStorage with the new field
+        localStorage.setItem("currentUserData", JSON.stringify(parsedUser));
+      }
+
       setCurrentUser(parsedUser);
       setIsLoggedIn(true);
       // Always go to home since we removed profile completion flow
@@ -2215,7 +2225,7 @@ function LoanApplicationsScreen({
     <div className="p-6 flex-grow bg-gray-50">
       <PageHeader title="Loan Options" onBack={() => navigate("home")} />
 
-      {/* Financial Overview */}
+      {/* Universal Financial Overview - Shows Available Equity for All Loan Types */}
       {currentUser && (
         <div
           className={`p-4 rounded-xl shadow-md mb-6 border-l-4 ${
@@ -2227,21 +2237,30 @@ function LoanApplicationsScreen({
           <p className="font-bold text-lg">Your Financial Overview:</p>
           {userHasEquityRecord ? (
             <>
-              <p className="text-md mt-1">
-                Current Equity:{" "}
-                <span className="font-semibold text-xl">
-                  ₱{currentEquity.toLocaleString()}
-                </span>
-              </p>
-              <p className="text-md mt-1">
-                Max Loanable Amount:{" "}
-                <span className="font-semibold text-xl">
+              <div className="grid grid-cols-2 gap-4 mt-3">
+                <div>
+                  <p className="text-sm font-medium">Total Equity:</p>
+                  <p className="font-semibold text-lg">
+                    ₱{currentEquity.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Outstanding Loans:</p>
+                  <p className="font-semibold text-lg">
+                    ₱{(currentEquity - maxLoanableAmount).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 p-3 bg-white bg-opacity-50 rounded-lg">
+                <p className="text-sm font-medium">Available for New Loans:</p>
+                <p className="font-bold text-xl text-green-600">
                   ₱{maxLoanableAmount.toLocaleString()}
-                </span>
-              </p>
-              <p className="text-xs mt-2">
-                Loanable amount is your equity minus outstanding loan balances.
-              </p>
+                </p>
+                <p className="text-xs mt-1">
+                  Available amount is your total equity minus outstanding loan
+                  balances.
+                </p>
+              </div>
             </>
           ) : (
             <p className="text-sm mt-1">
@@ -2693,15 +2712,23 @@ function LoanApplicationFormScreen({
       newErrors.proposedAmount = "Please enter a valid proposed amount";
     } else {
       const amount = parseFloat(formData.proposedAmount);
-      if (amount < loanType.minAmount) {
-        newErrors.proposedAmount = `Minimum amount is ₱${loanType.minAmount.toLocaleString()}`;
-      } else if (amount > loanType.maxAmount) {
-        newErrors.proposedAmount = `Maximum amount is ₱${loanType.maxAmount.toLocaleString()}`;
-      } else if (
-        loanType.userMaxLoanable &&
-        amount > loanType.userMaxLoanable
-      ) {
-        newErrors.proposedAmount = `Amount exceeds your max loanable amount of ₱${loanType.userMaxLoanable.toLocaleString()}`;
+
+      // UNIVERSAL validation for ALL loan types using new architecture
+      // Get current user's equity for validation
+      const currentUserEquity =
+        mockEquities.find((eq) => eq.userId === "user1")?.endingBalance
+          ?.total || 0;
+
+      // Use enhanced eligibility check with proposed amount (works for all loan types)
+      const eligibilityResult = checkLoanEligibility(
+        loanType,
+        defaultMockUser,
+        currentUserEquity,
+        amount
+      );
+
+      if (!eligibilityResult.eligible) {
+        newErrors.proposedAmount = eligibilityResult.reason;
       }
     }
 
@@ -2865,7 +2892,88 @@ function LoanApplicationFormScreen({
           <span className="font-medium ml-2">Interest Rate:</span>{" "}
           {loanType.interestRate}
         </div>
+
+        {/* Regular Loan Specific Information */}
+        {loanType.type === "Regular" && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <div className="space-y-2 text-xs">
+              <div>
+                <span className="font-medium">Interest Details:</span>{" "}
+                {loanType.interestRateTypeDescription}
+              </div>
+              <div>
+                <span className="font-medium">Repayment Method:</span>{" "}
+                Semi-monthly through payroll deduction
+              </div>
+              <div>
+                <span className="font-medium">Service Fee:</span> ₱200.00
+                (deducted from loan proceeds)
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Universal Dynamic Eligibility Display - Works for ALL Loan Types */}
+      {(() => {
+        const currentUserEquity =
+          mockEquities.find((eq) => eq.userId === "user1")?.endingBalance
+            ?.total || 0;
+        const eligibilityResult = checkLoanEligibility(
+          loanType,
+          defaultMockUser,
+          currentUserEquity
+        );
+
+        return (
+          eligibilityResult.eligible && (
+            <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg">
+              <h4 className="font-semibold mb-2">
+                Your {loanType.name} Eligibility
+              </h4>
+              <div className="text-sm space-y-1">
+                <p>
+                  <span className="font-medium">Your Tenure:</span>{" "}
+                  {eligibilityResult.tenureMonths} months
+                </p>
+                <p>
+                  <span className="font-medium">Your Total Equity:</span> ₱
+                  {eligibilityResult.totalEquity?.toLocaleString()}
+                </p>
+                <p>
+                  <span className="font-medium">Outstanding Loans:</span> ₱
+                  {eligibilityResult.outstandingLoans?.toLocaleString()}
+                </p>
+                <p>
+                  <span className="font-medium">Available Equity:</span>{" "}
+                  <span className="text-green-600 font-bold">
+                    ₱{eligibilityResult.availableEquity?.toLocaleString()}
+                  </span>
+                </p>
+                <p>
+                  <span className="font-medium">Maximum Loanable Amount:</span>{" "}
+                  <span className="text-blue-600 font-bold">
+                    ₱{eligibilityResult.dynamicMaxLoanable?.toLocaleString()}
+                  </span>
+                </p>
+                {eligibilityResult.dynamicMaxYearsPayment && (
+                  <p>
+                    <span className="font-medium">Maximum Payment Term:</span>{" "}
+                    {eligibilityResult.dynamicMaxYearsPayment} years (
+                    {eligibilityResult.dynamicMaxPaymentMonths} months)
+                  </p>
+                )}
+                {eligibilityResult.serviceFee && (
+                  <p>
+                    <span className="font-medium">Service Fee:</span> ₱
+                    {eligibilityResult.serviceFee.toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </div>
+          )
+        );
+      })()}
 
       <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 space-y-6">
         {/* 1. Proposed Amount - All loan types */}
@@ -2999,6 +3107,52 @@ function LoanApplicationFormScreen({
             <p className="text-red-500 text-xs mt-1">{errors.signature}</p>
           )}
         </div>
+
+        {/* Regular Loan Additional Information */}
+        {loanType.type === "Regular" && (
+          <div className="space-y-4">
+            {/* Consideration of Other Loans */}
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start">
+                <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-yellow-600 text-xs font-bold">!</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-yellow-800 mb-1">
+                    Important Notice
+                  </h4>
+                  <p className="text-sm text-yellow-700">
+                    Please note: Your outstanding loans with SSS, Pag-ibig, and
+                    other accounts with the University will be considered in the
+                    final loan determination.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Optional Additional Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600">
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                <h5 className="font-medium text-gray-700 mb-1">
+                  Loan Restructuring
+                </h5>
+                <p>
+                  Conditions apply for restructuring this loan. Contact the
+                  office for details.
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                <h5 className="font-medium text-gray-700 mb-1">
+                  Early Pre-termination
+                </h5>
+                <p>
+                  A fee may apply for early full settlement. Contact the office
+                  for details.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Agreement Checkbox */}
         <div className="flex items-start">
@@ -4238,6 +4392,71 @@ function calculateUserTenureMonths(currentUser) {
   return Math.max(0, monthsDiff);
 }
 
+/**
+ * Calculate Regular Loan maximum caps based on membership tenure
+ * Based on official Regular Loan tenure-based limits table
+ * @param {number} membershipMonths - Total months of membership
+ * @returns {object} - { maxLoanable, maxYearsPayment, maxMonthsPayment }
+ */
+function getRegularLoanMaxCaps(membershipMonths) {
+  // Convert months to handle year boundaries precisely
+  const years = Math.floor(membershipMonths / 12);
+  const remainingMonths = membershipMonths % 12;
+
+  // A. 5-9 months
+  if (membershipMonths >= 5 && membershipMonths < 10) {
+    return { maxLoanable: 3000, maxYearsPayment: 1, maxMonthsPayment: 12 };
+  }
+
+  // B. 10-11 months
+  if (membershipMonths >= 10 && membershipMonths < 12) {
+    return { maxLoanable: 6000, maxYearsPayment: 2, maxMonthsPayment: 24 };
+  }
+
+  // C. 1 year but less than 11 years (12 months to 131 months)
+  if (membershipMonths >= 12 && membershipMonths < 132) {
+    // Detailed sub-brackets for 1-10 years
+    if (years === 1)
+      return { maxLoanable: 18000, maxYearsPayment: 3, maxMonthsPayment: 36 };
+    if (years === 2)
+      return { maxLoanable: 36000, maxYearsPayment: 3, maxMonthsPayment: 36 };
+    if (years === 3)
+      return { maxLoanable: 60000, maxYearsPayment: 4, maxMonthsPayment: 48 };
+    if (years === 4)
+      return { maxLoanable: 90000, maxYearsPayment: 4, maxMonthsPayment: 48 };
+    if (years === 5)
+      return { maxLoanable: 120000, maxYearsPayment: 4, maxMonthsPayment: 48 };
+    if (years === 6)
+      return { maxLoanable: 150000, maxYearsPayment: 5, maxMonthsPayment: 60 };
+    if (years === 7)
+      return { maxLoanable: 180000, maxYearsPayment: 5, maxMonthsPayment: 60 };
+    if (years === 8)
+      return { maxLoanable: 210000, maxYearsPayment: 5, maxMonthsPayment: 60 };
+    if (years === 9)
+      return { maxLoanable: 240000, maxYearsPayment: 5, maxMonthsPayment: 60 };
+    if (years === 10)
+      return { maxLoanable: 300000, maxYearsPayment: 5, maxMonthsPayment: 60 };
+  }
+
+  // D. 11-14 years (132 months to 179 months)
+  if (membershipMonths >= 132 && membershipMonths < 180) {
+    return { maxLoanable: 350000, maxYearsPayment: 5, maxMonthsPayment: 60 };
+  }
+
+  // E. 15-19 years (180 months to 239 months)
+  if (membershipMonths >= 180 && membershipMonths < 240) {
+    return { maxLoanable: 500000, maxYearsPayment: 5, maxMonthsPayment: 60 };
+  }
+
+  // F. 20+ years (240+ months)
+  if (membershipMonths >= 240) {
+    return { maxLoanable: 600000, maxYearsPayment: 6, maxMonthsPayment: 72 };
+  }
+
+  // Less than 5 months - not eligible
+  return { maxLoanable: 0, maxYearsPayment: 0, maxMonthsPayment: 0 };
+}
+
 // Global amount validation function for denomination requirements
 function validateAmountDenomination(amount) {
   // Convert to number if it's a string
@@ -4247,28 +4466,422 @@ function validateAmountDenomination(amount) {
   return !isNaN(numAmount) && numAmount > 0 && numAmount % 1000 === 0;
 }
 
-function checkLoanEligibility(loan, currentUser, currentEquity) {
+/**
+ * Universal base loan eligibility validation for all loan types
+ * Handles common checks like equity, outstanding loans, amount validation
+ */
+function validateBaseLoanEligibility(
+  loan,
+  currentUser,
+  currentEquity,
+  availableEquity,
+  totalOutstanding,
+  userTenure,
+  proposedAmount = null
+) {
+  // 1. Check minimum equity requirement (applies to all loans)
+  if (currentEquity < loan.minEquityRequired) {
+    return {
+      eligible: false,
+      reason: `Minimum equity of ₱${loan.minEquityRequired.toLocaleString()} required. Your current equity: ₱${currentEquity.toLocaleString()}`,
+      totalEquity: currentEquity,
+      outstandingLoans: totalOutstanding,
+      availableEquity: availableEquity,
+    };
+  }
+
+  // 2. Check available equity after outstanding loans (universal)
+  if (availableEquity <= 0) {
+    return {
+      eligible: false,
+      reason: `No available equity for new loans. Your equity: ₱${currentEquity.toLocaleString()}, Outstanding loans: ₱${totalOutstanding.toLocaleString()}`,
+      totalEquity: currentEquity,
+      outstandingLoans: totalOutstanding,
+      availableEquity: availableEquity,
+    };
+  }
+
+  // 3. Check basic tenure requirement (if specified)
+  if (loan.minTenureMonths && userTenure < loan.minTenureMonths) {
+    return {
+      eligible: false,
+      reason: `Minimum ${loan.minTenureMonths} months of membership required. Your tenure: ${userTenure} months`,
+      totalEquity: currentEquity,
+      outstandingLoans: totalOutstanding,
+      availableEquity: availableEquity,
+    };
+  }
+
+  // 4. Validate proposed amount against available equity (universal)
+  if (proposedAmount !== null) {
+    if (!validateAmountDenomination(proposedAmount)) {
+      return {
+        eligible: false,
+        reason: "Amount must be in thousands (₱1,000, ₱2,000, etc.)",
+        totalEquity: currentEquity,
+        outstandingLoans: totalOutstanding,
+        availableEquity: availableEquity,
+      };
+    }
+
+    if (proposedAmount > availableEquity) {
+      return {
+        eligible: false,
+        reason: `Loan amount exceeds available equity. Available: ₱${availableEquity.toLocaleString()} (Total equity: ₱${currentEquity.toLocaleString()} - Outstanding loans: ₱${totalOutstanding.toLocaleString()})`,
+        totalEquity: currentEquity,
+        outstandingLoans: totalOutstanding,
+        availableEquity: availableEquity,
+      };
+    }
+
+    if (proposedAmount < loan.minAmount) {
+      return {
+        eligible: false,
+        reason: `Minimum amount is ₱${loan.minAmount.toLocaleString()}`,
+        totalEquity: currentEquity,
+        outstandingLoans: totalOutstanding,
+        availableEquity: availableEquity,
+      };
+    }
+
+    if (proposedAmount > loan.maxAmount) {
+      return {
+        eligible: false,
+        reason: `Maximum amount is ₱${loan.maxAmount.toLocaleString()}`,
+        totalEquity: currentEquity,
+        outstandingLoans: totalOutstanding,
+        availableEquity: availableEquity,
+      };
+    }
+  }
+
+  // Base checks passed
+  return {
+    eligible: true,
+    reason: "",
+    totalEquity: currentEquity,
+    outstandingLoans: totalOutstanding,
+    availableEquity: availableEquity,
+    tenureMonths: userTenure,
+  };
+}
+
+function checkLoanEligibility(
+  loan,
+  currentUser,
+  currentEquity,
+  proposedAmount = null
+) {
   if (!currentUser || currentEquity === undefined) {
     return { eligible: false, reason: "User information not available" };
   }
 
   const userTenure = calculateUserTenureMonths(currentUser);
 
-  if (currentEquity < loan.minEquityRequired) {
+  // UNIVERSAL: Calculate available equity by deducting outstanding loans (applies to ALL loan types)
+  const userOutstandingLoans = mockActiveLoans.filter(
+    (activeLoan) => activeLoan.userId === currentUser.id
+  );
+  const totalOutstanding = userOutstandingLoans.reduce(
+    (sum, loan) => sum + (loan.outstandingLoan || 0),
+    0
+  );
+  const availableEquity = currentEquity - totalOutstanding;
+
+  // UNIVERSAL: Base equity and tenure validations for all loan types
+  const baseEligibilityCheck = validateBaseLoanEligibility(
+    loan,
+    currentUser,
+    currentEquity,
+    availableEquity,
+    totalOutstanding,
+    userTenure,
+    proposedAmount
+  );
+
+  if (!baseEligibilityCheck.eligible) {
+    return baseEligibilityCheck;
+  }
+
+  // LOAN TYPE SPECIFIC VALIDATIONS
+  // After base validations pass, apply loan-specific business rules
+
+  if (loan.type === "Regular") {
+    return validateRegularLoanSpecific(
+      baseEligibilityCheck,
+      loan,
+      currentUser,
+      userTenure,
+      availableEquity,
+      proposedAmount
+    );
+  }
+
+  if (loan.type === "Emergency") {
+    return validateEmergencyLoanSpecific(
+      baseEligibilityCheck,
+      loan,
+      currentUser,
+      userTenure,
+      availableEquity,
+      proposedAmount
+    );
+  }
+
+  if (loan.type === "Special") {
+    return validateSpecialLoanSpecific(
+      baseEligibilityCheck,
+      loan,
+      currentUser,
+      userTenure,
+      availableEquity,
+      proposedAmount
+    );
+  }
+
+  if (loan.type === "ShortTerm") {
+    return validateShortTermLoanSpecific(
+      baseEligibilityCheck,
+      loan,
+      currentUser,
+      userTenure,
+      availableEquity,
+      proposedAmount
+    );
+  }
+
+  if (loan.type === "Car") {
+    return validateCarLoanSpecific(
+      baseEligibilityCheck,
+      loan,
+      currentUser,
+      userTenure,
+      availableEquity,
+      proposedAmount
+    );
+  }
+
+  if (loan.type === "Motorcycle") {
+    return validateMotorcycleLoanSpecific(
+      baseEligibilityCheck,
+      loan,
+      currentUser,
+      userTenure,
+      availableEquity,
+      proposedAmount
+    );
+  }
+
+  // Fallback: return base eligibility with available equity calculation
+  return {
+    ...baseEligibilityCheck,
+    dynamicMaxLoanable: Math.min(availableEquity, loan.maxAmount),
+  };
+}
+
+/**
+ * LOAN TYPE SPECIFIC VALIDATION FUNCTIONS
+ * These functions handle the detailed business rules for each loan type
+ * Future loan type configurations can be easily added here
+ */
+
+// Regular Loan specific validation (comprehensive implementation)
+function validateRegularLoanSpecific(
+  baseCheck,
+  loan,
+  currentUser,
+  userTenure,
+  availableEquity,
+  proposedAmount
+) {
+  const serviceFee = 200;
+
+  // 1. Check minimum 5 months of contributions
+  if (userTenure < 5) {
     return {
+      ...baseCheck,
       eligible: false,
-      reason: `Minimum equity of ₱${loan.minEquityRequired.toLocaleString()} required. Your current equity: ₱${currentEquity.toLocaleString()}`,
+      reason: `Regular Loan requires minimum 5 months of contributions. Your tenure: ${userTenure} months`,
+      serviceFee,
     };
   }
 
-  if (userTenure < loan.minTenureMonths) {
+  // 2. Check net pay requirement (≥ ₱3,000)
+  if (!currentUser.netPay || currentUser.netPay < 3000) {
     return {
+      ...baseCheck,
       eligible: false,
-      reason: `Minimum ${loan.minTenureMonths} months of membership required. Your tenure: ${userTenure} months`,
+      reason: `Net pay must be at least ₱3,000 per month. Your current net pay: ₱${
+        currentUser.netPay?.toLocaleString() || "Not available"
+      }`,
+      serviceFee,
     };
   }
 
-  return { eligible: true, reason: "" };
+  // 3. Get tenure-based maximum caps
+  const tenureCaps = getRegularLoanMaxCaps(userTenure);
+  if (tenureCaps.maxLoanable === 0) {
+    return {
+      ...baseCheck,
+      eligible: false,
+      reason: `Insufficient tenure for Regular Loan. Minimum 5 months required.`,
+      serviceFee,
+    };
+  }
+
+  // 4. Validate proposed amount against tenure-based caps
+  if (proposedAmount !== null && proposedAmount > tenureCaps.maxLoanable) {
+    return {
+      ...baseCheck,
+      eligible: false,
+      reason: `Based on your ${userTenure} months of tenure, maximum loanable amount is ₱${tenureCaps.maxLoanable.toLocaleString()}`,
+      serviceFee,
+    };
+  }
+
+  // Calculate effective maximum (lesser of available equity and tenure-based cap)
+  const effectiveMaxLoanable = Math.min(
+    availableEquity,
+    tenureCaps.maxLoanable
+  );
+
+  return {
+    ...baseCheck,
+    eligible: true,
+    dynamicMaxLoanable: effectiveMaxLoanable,
+    dynamicMaxPaymentMonths: tenureCaps.maxMonthsPayment,
+    dynamicMaxYearsPayment: tenureCaps.maxYearsPayment,
+    serviceFee,
+  };
+}
+
+// Emergency Loan specific validation (placeholder for future implementation)
+function validateEmergencyLoanSpecific(
+  baseCheck,
+  loan,
+  currentUser,
+  userTenure,
+  availableEquity,
+  proposedAmount
+) {
+  // TODO: Implement Emergency Loan specific rules when "Key Emergency Loan Conditions" are provided
+  // Expected: tenure-based maximum amounts, fixed 2-year term, specific eligibility criteria
+
+  return {
+    ...baseCheck,
+    dynamicMaxLoanable: Math.min(availableEquity, loan.maxAmount),
+    // Placeholder values based on loan configuration table
+    dynamicMaxPaymentMonths: 24, // 2 years fixed
+    dynamicMaxYearsPayment: 2,
+  };
+}
+
+// Special Loan specific validation (placeholder for future implementation)
+function validateSpecialLoanSpecific(
+  baseCheck,
+  loan,
+  currentUser,
+  userTenure,
+  availableEquity,
+  proposedAmount
+) {
+  // TODO: Implement Special Loan specific rules when "Key Special Loan Conditions" are provided
+  // Expected: fixed 6-month term, TIN requirement, specific conditions
+
+  return {
+    ...baseCheck,
+    dynamicMaxLoanable: Math.min(availableEquity, loan.maxAmount),
+    // Placeholder values based on loan configuration table
+    dynamicMaxPaymentMonths: 6, // 6 months fixed
+    dynamicMaxYearsPayment: 0.5,
+  };
+}
+
+// Short Term Loan specific validation (basic implementation based on table)
+function validateShortTermLoanSpecific(
+  baseCheck,
+  loan,
+  currentUser,
+  userTenure,
+  availableEquity,
+  proposedAmount
+) {
+  // Minimum 3 years of membership requirement
+  if (userTenure < 36) {
+    return {
+      ...baseCheck,
+      eligible: false,
+      reason: `Short Term Loan requires minimum 3 years (36 months) of membership. Your tenure: ${userTenure} months`,
+    };
+  }
+
+  // Fixed amount validation (₱5,000 only)
+  if (proposedAmount !== null && proposedAmount !== 5000) {
+    return {
+      ...baseCheck,
+      eligible: false,
+      reason: `Short Term Loan amount is fixed at ₱5,000`,
+    };
+  }
+
+  return {
+    ...baseCheck,
+    dynamicMaxLoanable: 5000, // Fixed amount
+    dynamicMaxPaymentMonths: 3, // 3 months fixed
+    dynamicMaxYearsPayment: 0.25,
+  };
+}
+
+// Car Loan specific validation (basic implementation based on table)
+function validateCarLoanSpecific(
+  baseCheck,
+  loan,
+  currentUser,
+  userTenure,
+  availableEquity,
+  proposedAmount
+) {
+  // Minimum 10 years of membership requirement
+  if (userTenure < 120) {
+    return {
+      ...baseCheck,
+      eligible: false,
+      reason: `Car Loan requires minimum 10 years (120 months) of membership. Your tenure: ${userTenure} months`,
+    };
+  }
+
+  return {
+    ...baseCheck,
+    dynamicMaxLoanable: Math.min(availableEquity, loan.maxAmount),
+    dynamicMaxPaymentMonths: 72, // 6 years fixed
+    dynamicMaxYearsPayment: 6,
+  };
+}
+
+// Motorcycle Loan specific validation (basic implementation based on table)
+function validateMotorcycleLoanSpecific(
+  baseCheck,
+  loan,
+  currentUser,
+  userTenure,
+  availableEquity,
+  proposedAmount
+) {
+  // Minimum 10 years of membership requirement
+  if (userTenure < 120) {
+    return {
+      ...baseCheck,
+      eligible: false,
+      reason: `Motorcycle Loan requires minimum 10 years (120 months) of membership. Your tenure: ${userTenure} months`,
+    };
+  }
+
+  return {
+    ...baseCheck,
+    dynamicMaxLoanable: Math.min(availableEquity, loan.maxAmount),
+    dynamicMaxPaymentMonths: 36, // 3 years fixed
+    dynamicMaxYearsPayment: 3,
+  };
 }
 
 export default App;
