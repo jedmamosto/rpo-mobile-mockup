@@ -94,6 +94,81 @@ const defaultMockUser = {
   profileComplete: true,
 };
 
+// === START: NEW TEST USERS ===
+// Login credentials for testing:
+// • user@cpu.edu.ph (PIN: 123456) - Juan Dela Cruz
+// • maria.santos@cpu.edu.ph (PIN: 789012) - Maria Santos
+// • carlos.reyes@cpu.edu.ph (PIN: 456789) - Carlos Reyes
+// • ana.villanueva@cpu.edu.ph (PIN: 654321) - Ana Villanueva
+// • newuser@cpu.edu.ph - For new user registration flow
+
+const testUser2 = {
+  id: "user2",
+  cpuld: "22-8901-45",
+  surname: "Santos",
+  firstname: "Maria",
+  middlename: "Elena",
+  cpuEmail: "maria.santos@cpu.edu.ph",
+  birthdate: "1988-11-22",
+  civilStatus: "Single",
+  sex: "Female",
+  dateOfMembership: "2016-08-15",
+  fsClassification: "Faculty",
+  department: "College of Computer Studies",
+  dateHired: "2016-08-15",
+  contactNumber: "09234567890",
+  netPay: 35000, // Higher net pay for better loan eligibility
+  isActive: true,
+  pin: "789012",
+  hasPin: true,
+  profileComplete: true,
+};
+
+const testUser3 = {
+  id: "user3",
+  cpuld: "19-5432-67",
+  surname: "Reyes",
+  firstname: "Carlos",
+  middlename: "Miguel",
+  cpuEmail: "carlos.reyes@cpu.edu.ph",
+  birthdate: "1982-04-10",
+  civilStatus: "Married",
+  sex: "Male",
+  dateOfMembership: "2019-03-20",
+  fsClassification: "Administrative Staff",
+  department: "College of Business",
+  dateHired: "2019-03-20",
+  contactNumber: "09345678901",
+  netPay: 28000, // Moderate net pay
+  isActive: true,
+  pin: "456789",
+  hasPin: true,
+  profileComplete: true,
+};
+
+const testUser4 = {
+  id: "user4",
+  cpuld: "23-1098-76",
+  surname: "Villanueva",
+  firstname: "Ana",
+  middlename: "Grace",
+  cpuEmail: "ana.villanueva@cpu.edu.ph",
+  birthdate: "1992-09-05",
+  civilStatus: "Single",
+  sex: "Female",
+  dateOfMembership: "2022-01-10",
+  fsClassification: "Faculty",
+  department: "College of Nursing",
+  dateHired: "2022-01-10",
+  contactNumber: "09456789012",
+  netPay: 22000, // Standard net pay for newer member
+  isActive: true,
+  pin: "654321",
+  hasPin: true,
+  profileComplete: true,
+};
+// === END: NEW TEST USERS ===
+
 const newMockUserBaseTemplate = {
   id: "",
   cpuld: "98-7654-32",
@@ -155,44 +230,162 @@ const mockEquities = [
     endingEquity: 116200,
     beginningBalance: { contribution: 83000, income: 6000 },
   },
+  // === START: ADDITIONAL EQUITY DATA FOR EXISTING USER ===
   {
-    id: "eq_new_user_placeholder",
-    userId: "newMockUserIdPlaceholder",
-    employeeNo: "98-7654-32",
-    employeeName: "Maria Rosario Santos",
+    id: "eq1_prev",
+    userId: "user1",
+    employeeNo: "12-3456-78",
+    employeeName: "Juan Ponce Dela Cruz",
     statementPeriod: {
-      startDate: "",
-      endDate: "",
-      asOfDate: "",
+      startDate: "2022-01-01",
+      endDate: "2022-12-31",
+      asOfDate: "2022-12-31",
     },
     startingBalance: {
-      yourContributions: 0,
-      employerContributions: 0,
-      yourEarnings: 0,
-      employerEarnings: 0,
-      total: 0,
+      yourContributions: 33000,
+      employerContributions: 28000,
+      yourEarnings: 2400,
+      employerEarnings: 2000,
+      total: 65400,
     },
     activityThisPeriod: {
-      yourNewContributions: 0,
-      employerNewContributions: 0,
-      yourNewEarnings: 0,
-      employerNewEarnings: 0,
+      yourNewContributions: 12000,
+      employerNewContributions: 10000,
+      yourNewEarnings: 800,
+      employerEarnings: 800,
     },
     endingBalance: {
-      yourContributions: 0,
-      employerContributions: 0,
-      yourEarnings: 0,
-      employerEarnings: 0,
-      total: 0,
+      yourContributions: 45000,
+      employerContributions: 38000,
+      yourEarnings: 3200,
+      employerEarnings: 2800,
+      total: 89000,
     },
     // Legacy fields for backward compatibility
-    startDate: "",
-    endDate: "",
-    contribution: 0,
+    startDate: "2022-01-01",
+    endDate: "2022-12-31",
+    contribution: 12000,
     withdrawals: 0,
-    endingEquity: 0,
-    beginningBalance: { contribution: 0, income: 0 },
+    endingEquity: 89000,
+    beginningBalance: { contribution: 61000, income: 4400 },
   },
+  // === END: ADDITIONAL EQUITY DATA FOR EXISTING USER ===
+  // === START: NEW TEST USER EQUITY DATA ===
+  {
+    id: "eq2",
+    userId: "user2",
+    employeeNo: "22-8901-45",
+    employeeName: "Maria Elena Santos",
+    statementPeriod: {
+      startDate: "2023-01-01",
+      endDate: "2023-12-31",
+      asOfDate: "2023-12-31",
+    },
+    startingBalance: {
+      yourContributions: 62000,
+      employerContributions: 52000,
+      yourEarnings: 4800,
+      employerEarnings: 4200,
+      total: 123000,
+    },
+    activityThisPeriod: {
+      yourNewContributions: 16800,
+      employerNewContributions: 14000,
+      yourNewEarnings: 3900,
+      employerNewEarnings: 3300,
+    },
+    endingBalance: {
+      yourContributions: 78800,
+      employerContributions: 66000,
+      yourEarnings: 8700,
+      employerEarnings: 7500,
+      total: 161000,
+    },
+    // Legacy fields for backward compatibility
+    startDate: "2023-01-01",
+    endDate: "2023-12-31",
+    contribution: 16800,
+    withdrawals: 0,
+    endingEquity: 161000,
+    beginningBalance: { contribution: 114000, income: 9000 },
+  },
+  {
+    id: "eq3",
+    userId: "user3",
+    employeeNo: "19-5432-67",
+    employeeName: "Carlos Miguel Reyes",
+    statementPeriod: {
+      startDate: "2023-01-01",
+      endDate: "2023-12-31",
+      asOfDate: "2023-12-31",
+    },
+    startingBalance: {
+      yourContributions: 38000,
+      employerContributions: 32000,
+      yourEarnings: 2200,
+      employerEarnings: 1800,
+      total: 74000,
+    },
+    activityThisPeriod: {
+      yourNewContributions: 13440,
+      employerNewContributions: 11200,
+      yourNewEarnings: 2400,
+      employerNewEarnings: 2000,
+    },
+    endingBalance: {
+      yourContributions: 51440,
+      employerContributions: 43200,
+      yourEarnings: 4600,
+      employerEarnings: 3800,
+      total: 103040,
+    },
+    // Legacy fields for backward compatibility
+    startDate: "2023-01-01",
+    endDate: "2023-12-31",
+    contribution: 13440,
+    withdrawals: 0,
+    endingEquity: 103040,
+    beginningBalance: { contribution: 70000, income: 4000 },
+  },
+  {
+    id: "eq4",
+    userId: "user4",
+    employeeNo: "23-1098-76",
+    employeeName: "Ana Grace Villanueva",
+    statementPeriod: {
+      startDate: "2023-01-01",
+      endDate: "2023-12-31",
+      asOfDate: "2023-12-31",
+    },
+    startingBalance: {
+      yourContributions: 8000,
+      employerContributions: 6500,
+      yourEarnings: 200,
+      employerEarnings: 150,
+      total: 14850,
+    },
+    activityThisPeriod: {
+      yourNewContributions: 10560,
+      employerNewContributions: 8800,
+      yourNewEarnings: 600,
+      employerNewEarnings: 500,
+    },
+    endingBalance: {
+      yourContributions: 18560,
+      employerContributions: 15300,
+      yourEarnings: 800,
+      employerEarnings: 650,
+      total: 35310,
+    },
+    // Legacy fields for backward compatibility
+    startDate: "2023-01-01",
+    endDate: "2023-12-31",
+    contribution: 10560,
+    withdrawals: 0,
+    endingEquity: 35310,
+    beginningBalance: { contribution: 14500, income: 350 },
+  },
+  // === END: NEW TEST USER EQUITY DATA ===
 ];
 
 const mockActiveLoans = [
@@ -228,6 +421,106 @@ const mockActiveLoans = [
     dateReleased: "2024-03-06",
     maturityDate: "2024-09-05",
   },
+  // === START: ADDITIONAL LOANS FOR USER1 ===
+  {
+    id: "loan3",
+    userId: "user1",
+    loanCode: "STL2024-012",
+    dateApplied: "2024-04-15",
+    outstandingLoan: 14500.0,
+    outstandingLoanDate: "2024-05-01",
+    loanTypeDetail: "Short Term Loan",
+    amountGranted: 15000,
+    numOfTerms: 6,
+    interestRate: "7%",
+    repaymentAmount: 2600,
+    dateGranted: "2024-04-18",
+    dateReleased: "2024-04-20",
+    maturityDate: "2024-10-18",
+  },
+  {
+    id: "loan4",
+    userId: "user1",
+    loanCode: "CL2023-089",
+    dateApplied: "2023-08-05",
+    outstandingLoan: 285000.0,
+    outstandingLoanDate: "2024-05-01",
+    loanTypeDetail: "Car Loan",
+    dateReleased: "2023-08-15",
+    maturityDate: "2028-08-15",
+    numYearsToPay: 5,
+    pnAmount: 350000,
+    dateGranted: "2023-08-10",
+    interestRate: "7%",
+    repaymentAmount: 6950,
+  },
+  // === END: ADDITIONAL LOANS FOR USER1 ===
+  // === START: LOANS FOR NEW TEST USERS ===
+  {
+    id: "loan5",
+    userId: "user2",
+    loanCode: "SL2024-034",
+    dateApplied: "2024-02-10",
+    outstandingLoan: 17500.0,
+    outstandingLoanDate: "2024-05-01",
+    loanTypeDetail: "Special Loan",
+    amountGranted: 18000,
+    numOfTerms: 6,
+    interestRate: "7%",
+    repaymentAmount: 3100,
+    dateGranted: "2024-02-15",
+    dateReleased: "2024-02-18",
+    maturityDate: "2024-08-15",
+  },
+  {
+    id: "loan6",
+    userId: "user2",
+    loanCode: "EL2024-089",
+    dateApplied: "2024-04-02",
+    outstandingLoan: 23500.0,
+    outstandingLoanDate: "2024-05-01",
+    loanTypeDetail: "Emergency Loan",
+    amountGranted: 25000,
+    numOfTerms: 24,
+    interestRate: "7%",
+    repaymentAmount: 1200,
+    dateGranted: "2024-04-05",
+    dateReleased: "2024-04-06",
+    maturityDate: "2026-04-05",
+  },
+  {
+    id: "loan7",
+    userId: "user3",
+    loanCode: "RL2023-178",
+    dateApplied: "2023-11-20",
+    outstandingLoan: 67800.0,
+    outstandingLoanDate: "2024-05-01",
+    loanTypeDetail: "Regular Loan",
+    dateReleased: "2023-12-01",
+    maturityDate: "2027-12-01",
+    numYearsToPay: 4,
+    pnAmount: 80000,
+    dateGranted: "2023-11-25",
+    interestRate: "7%",
+    repaymentAmount: 1950,
+  },
+  {
+    id: "loan8",
+    userId: "user4",
+    loanCode: "EL2024-156",
+    dateApplied: "2024-03-28",
+    outstandingLoan: 8900.0,
+    outstandingLoanDate: "2024-05-01",
+    loanTypeDetail: "Emergency Loan",
+    amountGranted: 9500,
+    numOfTerms: 24,
+    interestRate: "7%",
+    repaymentAmount: 455,
+    dateGranted: "2024-04-01",
+    dateReleased: "2024-04-03",
+    maturityDate: "2026-04-01",
+  },
+  // === END: LOANS FOR NEW TEST USERS ===
 ];
 
 const mockLoanBreakdown = [
@@ -682,6 +975,356 @@ const mockSubmittedApplications = [
       { item: "Valid ID", status: "Submitted", date: "2024-01-10" },
     ],
   },
+  // === START: ADDITIONAL APPLICATIONS FOR USER1 ===
+  {
+    id: "app4",
+    userId: "user1",
+    type: "Short Term Loan",
+    submissionDate: "2024-04-10",
+    status: "Approved",
+    proposedAmount: 15000,
+    approvedAmount: 15000,
+    adminNotes: "Application approved for full requested amount.",
+    statusHistory: [
+      {
+        date: "2024-04-10",
+        status: "Submitted",
+        note: "Short term loan application received.",
+      },
+      {
+        date: "2024-04-12",
+        status: "Under Review",
+        note: "Fast-track review for short term loan.",
+      },
+      {
+        date: "2024-04-15",
+        status: "Approved",
+        note: "Application approved for full amount.",
+      },
+      {
+        date: "2024-04-18",
+        status: "Funds Released",
+        note: "Loan disbursed successfully.",
+      },
+    ],
+    requirements: [
+      { item: "Valid ID", status: "Submitted", date: "2024-04-10" },
+      { item: "Promissory Note", status: "Submitted", date: "2024-04-15" },
+    ],
+    releaseDate: "2024-04-18",
+  },
+  {
+    id: "app5",
+    userId: "user1",
+    type: "Car Loan",
+    submissionDate: "2023-07-28",
+    status: "Approved",
+    proposedAmount: 350000,
+    approvedAmount: 350000,
+    adminNotes:
+      "Car loan approved for vehicle purchase. All documentation complete.",
+    statusHistory: [
+      {
+        date: "2023-07-28",
+        status: "Submitted",
+        note: "Car loan application with vehicle documentation received.",
+      },
+      {
+        date: "2023-08-02",
+        status: "Under Review",
+        note: "Vehicle appraisal and member equity assessment in progress.",
+      },
+      {
+        date: "2023-08-08",
+        status: "Approved",
+        note: "Application approved after vehicle verification.",
+      },
+      {
+        date: "2023-08-10",
+        status: "Funds Released",
+        note: "Car loan disbursed to dealership.",
+      },
+    ],
+    requirements: [
+      { item: "Vehicle Quotation", status: "Submitted", date: "2023-07-28" },
+      { item: "Valid ID", status: "Submitted", date: "2023-07-28" },
+      { item: "Income Certificate", status: "Submitted", date: "2023-07-30" },
+      { item: "Vehicle Registration", status: "Submitted", date: "2023-08-08" },
+    ],
+    releaseDate: "2023-08-10",
+  },
+  // === END: ADDITIONAL APPLICATIONS FOR USER1 ===
+  // === START: APPLICATIONS FOR NEW TEST USERS ===
+  {
+    id: "app6",
+    userId: "user2",
+    type: "Special Loan",
+    submissionDate: "2024-02-08",
+    status: "Approved",
+    proposedAmount: 18000,
+    approvedAmount: 18000,
+    adminNotes: "Special loan approved for educational purposes.",
+    statusHistory: [
+      {
+        date: "2024-02-08",
+        status: "Submitted",
+        note: "Special loan application for educational expenses.",
+      },
+      {
+        date: "2024-02-12",
+        status: "Under Review",
+        note: "Educational documentation verified.",
+      },
+      {
+        date: "2024-02-14",
+        status: "Approved",
+        note: "Application approved for special educational purpose.",
+      },
+      {
+        date: "2024-02-15",
+        status: "Funds Released",
+        note: "Special loan disbursed.",
+      },
+    ],
+    requirements: [
+      {
+        item: "Educational Enrollment",
+        status: "Submitted",
+        date: "2024-02-08",
+      },
+      { item: "Valid ID", status: "Submitted", date: "2024-02-08" },
+    ],
+    releaseDate: "2024-02-15",
+  },
+  {
+    id: "app7",
+    userId: "user2",
+    type: "Emergency Loan",
+    submissionDate: "2024-04-01",
+    status: "Approved",
+    proposedAmount: 25000,
+    approvedAmount: 25000,
+    adminNotes: "Emergency loan approved for medical expenses.",
+    statusHistory: [
+      {
+        date: "2024-04-01",
+        status: "Submitted",
+        note: "Emergency loan application for medical emergency.",
+      },
+      {
+        date: "2024-04-03",
+        status: "Under Review",
+        note: "Medical documentation verified.",
+      },
+      {
+        date: "2024-04-04",
+        status: "Approved",
+        note: "Emergency loan approved due to medical necessity.",
+      },
+      {
+        date: "2024-04-05",
+        status: "Funds Released",
+        note: "Emergency funds disbursed.",
+      },
+    ],
+    requirements: [
+      { item: "Medical Certificate", status: "Submitted", date: "2024-04-01" },
+      { item: "Valid ID", status: "Submitted", date: "2024-04-01" },
+    ],
+    releaseDate: "2024-04-05",
+  },
+  {
+    id: "app8",
+    userId: "user2",
+    type: "Regular Loan",
+    submissionDate: "2024-05-15",
+    status: "Pending Review",
+    proposedAmount: 85000,
+    approvedAmount: null,
+    adminNotes: "Application under review, awaiting final equity assessment.",
+    statusHistory: [
+      {
+        date: "2024-05-15",
+        status: "Submitted",
+        note: "Regular loan application received.",
+      },
+      {
+        date: "2024-05-18",
+        status: "Under Review",
+        note: "Initial documentation review completed.",
+      },
+      {
+        date: "2024-05-22",
+        status: "Pending Review",
+        note: "Awaiting final equity calculation and approval.",
+      },
+    ],
+    requirements: [
+      {
+        item: "Employment Certificate",
+        status: "Submitted",
+        date: "2024-05-15",
+      },
+      { item: "Income Statement", status: "Submitted", date: "2024-05-15" },
+      { item: "Valid ID", status: "Submitted", date: "2024-05-15" },
+    ],
+  },
+  {
+    id: "app9",
+    userId: "user3",
+    type: "Regular Loan",
+    submissionDate: "2023-11-15",
+    status: "Approved",
+    proposedAmount: 80000,
+    approvedAmount: 80000,
+    adminNotes: "Regular loan approved for home improvement project.",
+    statusHistory: [
+      {
+        date: "2023-11-15",
+        status: "Submitted",
+        note: "Regular loan application for home improvement.",
+      },
+      {
+        date: "2023-11-20",
+        status: "Under Review",
+        note: "Documentation and equity verification in progress.",
+      },
+      {
+        date: "2023-11-24",
+        status: "Approved",
+        note: "Application approved for full requested amount.",
+      },
+      {
+        date: "2023-11-25",
+        status: "Funds Released",
+        note: "Regular loan disbursed.",
+      },
+    ],
+    requirements: [
+      {
+        item: "Employment Certificate",
+        status: "Submitted",
+        date: "2023-11-15",
+      },
+      { item: "Income Statement", status: "Submitted", date: "2023-11-15" },
+      { item: "Valid ID", status: "Submitted", date: "2023-11-15" },
+      { item: "Project Estimate", status: "Submitted", date: "2023-11-18" },
+    ],
+    releaseDate: "2023-11-25",
+  },
+  {
+    id: "app10",
+    userId: "user3",
+    type: "Car Loan",
+    submissionDate: "2024-05-20",
+    status: "Pending Review",
+    proposedAmount: 450000,
+    approvedAmount: null,
+    adminNotes:
+      "Car loan application under review, awaiting vehicle appraisal.",
+    statusHistory: [
+      {
+        date: "2024-05-20",
+        status: "Submitted",
+        note: "Car loan application with vehicle documentation.",
+      },
+      {
+        date: "2024-05-23",
+        status: "Under Review",
+        note: "Vehicle documentation review and appraisal scheduling.",
+      },
+      {
+        date: "2024-05-28",
+        status: "Pending Review",
+        note: "Awaiting final vehicle appraisal and equity verification.",
+      },
+    ],
+    requirements: [
+      { item: "Vehicle Quotation", status: "Submitted", date: "2024-05-20" },
+      { item: "Valid ID", status: "Submitted", date: "2024-05-20" },
+      { item: "Income Certificate", status: "Submitted", date: "2024-05-22" },
+      { item: "Vehicle Appraisal", status: "Pending", date: null },
+    ],
+  },
+  {
+    id: "app11",
+    userId: "user4",
+    type: "Emergency Loan",
+    submissionDate: "2024-03-25",
+    status: "Approved",
+    proposedAmount: 9500,
+    approvedAmount: 9500,
+    adminNotes: "Emergency loan approved for new member with urgent need.",
+    statusHistory: [
+      {
+        date: "2024-03-25",
+        status: "Submitted",
+        note: "Emergency loan application from new member.",
+      },
+      {
+        date: "2024-03-28",
+        status: "Under Review",
+        note: "Emergency documentation verified for new member.",
+      },
+      {
+        date: "2024-03-30",
+        status: "Approved",
+        note: "Emergency loan approved despite short tenure due to urgent need.",
+      },
+      {
+        date: "2024-04-01",
+        status: "Funds Released",
+        note: "Emergency loan disbursed.",
+      },
+    ],
+    requirements: [
+      {
+        item: "Emergency Justification",
+        status: "Submitted",
+        date: "2024-03-25",
+      },
+      { item: "Valid ID", status: "Submitted", date: "2024-03-25" },
+    ],
+    releaseDate: "2024-04-01",
+  },
+  {
+    id: "app12",
+    userId: "user4",
+    type: "Regular Loan",
+    submissionDate: "2024-05-10",
+    status: "Rejected",
+    proposedAmount: 50000,
+    approvedAmount: 0,
+    adminNotes:
+      "Application rejected due to insufficient membership tenure for regular loan eligibility.",
+    statusHistory: [
+      {
+        date: "2024-05-10",
+        status: "Submitted",
+        note: "Regular loan application from relatively new member.",
+      },
+      {
+        date: "2024-05-13",
+        status: "Under Review",
+        note: "Tenure and eligibility assessment in progress.",
+      },
+      {
+        date: "2024-05-16",
+        status: "Rejected",
+        note: "Insufficient membership tenure for regular loan. Minimum 5 years required.",
+      },
+    ],
+    requirements: [
+      {
+        item: "Employment Certificate",
+        status: "Submitted",
+        date: "2024-05-10",
+      },
+      { item: "Income Statement", status: "Submitted", date: "2024-05-10" },
+      { item: "Valid ID", status: "Submitted", date: "2024-05-10" },
+    ],
+  },
+  // === END: APPLICATIONS FOR NEW TEST USERS ===
 ];
 
 const mockNotifications = [
@@ -699,6 +1342,48 @@ const mockNotifications = [
     timestamp: "1 day ago",
     read: true,
   },
+  // === START: ADDITIONAL NOTIFICATIONS ===
+  {
+    id: "notif3",
+    title: "Application Under Review",
+    snippet:
+      "Your Special Loan application is currently under review by our loan committee.",
+    timestamp: "3 days ago",
+    read: true,
+  },
+  {
+    id: "notif4",
+    title: "New Policy Update",
+    snippet:
+      "Updated loan interest rates effective June 2024. Check the latest rates in your loan applications.",
+    timestamp: "1 week ago",
+    read: false,
+  },
+  {
+    id: "notif5",
+    title: "Payment Processed",
+    snippet:
+      "Your payment of ₱2,600 for loan STL2024-012 has been successfully processed.",
+    timestamp: "2 weeks ago",
+    read: true,
+  },
+  {
+    id: "notif6",
+    title: "Equity Statement Available",
+    snippet:
+      "Your 2023 equity statement is now available for download in your profile.",
+    timestamp: "3 weeks ago",
+    read: true,
+  },
+  {
+    id: "notif7",
+    title: "Loan Application Rejected",
+    snippet:
+      "Your Regular Loan application has been rejected. Please contact our office for details.",
+    timestamp: "1 month ago",
+    read: false,
+  },
+  // === END: ADDITIONAL NOTIFICATIONS ===
 ];
 
 const mockFaqs = [
@@ -711,8 +1396,41 @@ const mockFaqs = [
   {
     id: "faq2",
     question: "What are the eligibility requirements?",
-    answer: "Eligibility requirements vary... (details as before)",
+    answer:
+      "Eligibility requirements vary based on loan type and your membership tenure. Generally, you need to be an active member with sufficient equity balance and meet the minimum tenure requirements for each loan type.",
   },
+  // === START: ADDITIONAL FAQ ENTRIES ===
+  {
+    id: "faq3",
+    question: "How long does loan processing take?",
+    answer:
+      "Processing times vary by loan type: Emergency loans typically take 2-3 business days, Special loans take 3-5 business days, while Regular and Car loans may take 7-14 business days depending on documentation completeness and equity verification.",
+  },
+  {
+    id: "faq4",
+    question: "What happens if I miss a payment?",
+    answer:
+      "Late payments may incur penalty charges and affect your loan standing. We recommend contacting our office immediately if you anticipate payment difficulties. We can discuss payment restructuring options based on your circumstances.",
+  },
+  {
+    id: "faq5",
+    question: "Can I have multiple active loans?",
+    answer:
+      "Yes, you can have multiple active loans provided your total outstanding balance doesn't exceed your available equity and you meet the income requirements for the combined monthly payments. Each new loan application will be evaluated based on your current financial standing.",
+  },
+  {
+    id: "faq6",
+    question: "How is my loan eligibility calculated?",
+    answer:
+      "Loan eligibility is based on several factors: your current equity balance, membership tenure, monthly net income, existing loan obligations, and the specific requirements for each loan type. Our system automatically calculates your maximum eligible amount when you apply.",
+  },
+  {
+    id: "faq7",
+    question: "What documents do I need for loan applications?",
+    answer:
+      "Required documents vary by loan type but typically include: Valid government ID, latest payslip or income certificate, employment certificate, and additional documents specific to the loan purpose (e.g., vehicle quotation for car loans, medical certificates for emergency loans).",
+  },
+  // === END: ADDITIONAL FAQ ENTRIES ===
 ];
 
 // --- New UI Helper Components for PIN Screens ---
@@ -837,6 +1555,10 @@ function App() {
 
     setUserLoginEmail(email);
     const newUserId = `new${Date.now()}`;
+
+    // Create array of all existing users
+    const allUsers = [defaultMockUser, testUser2, testUser3, testUser4];
+
     if (email.toLowerCase() === "newuser@cpu.edu.ph") {
       setIsNewUserFlow(true);
       const newUser = {
@@ -846,14 +1568,21 @@ function App() {
       };
       setCurrentUser(newUser);
       navigate("createPin");
-    } else if (email.toLowerCase() === defaultMockUser.cpuEmail.toLowerCase()) {
-      setIsNewUserFlow(false);
-      setCurrentUser(defaultMockUser);
-      navigate("loginPin");
     } else {
-      setErrorMessage(
-        "Email not recognized. Try user@cpu.edu.ph or newuser@cpu.edu.ph"
+      // Find user by email (case insensitive)
+      const foundUser = allUsers.find(
+        (user) => user.cpuEmail.toLowerCase() === email.toLowerCase()
       );
+
+      if (foundUser) {
+        setIsNewUserFlow(false);
+        setCurrentUser(foundUser);
+        navigate("loginPin");
+      } else {
+        setErrorMessage(
+          "Email not recognized. Try:\n• user@cpu.edu.ph (Juan Dela Cruz)\n• maria.santos@cpu.edu.ph (Maria Santos)\n• carlos.reyes@cpu.edu.ph (Carlos Reyes)\n• ana.villanueva@cpu.edu.ph (Ana Villanueva)\n• newuser@cpu.edu.ph (New User)"
+        );
+      }
     }
   };
 
@@ -2524,7 +3253,7 @@ function LoanApplicationsScreen({
         <button
           onClick={() =>
             alert(
-              "Contact Information:\n\nRetirement Plan Office\nEmail: rpo@cpu.edu.ph\nPhone: (033) 329-1971\nOffice Hours: Monday-Friday, 8:00 AM - 5:00 PM"
+              "Contact Information:\n\nRetirement Plan Office\nEmail: rpo@cpu.edu.ph\nPhone: (033) 329-1971\nOffice Hours: Monday-Friday, 8:00 AM - 12:00 PM & 1:00 PM - 5:00 PM"
             )
           }
           className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
@@ -3955,7 +4684,8 @@ function HelpScreen({ navigate }) {
               <strong>Phone:</strong> (033) 329-1971
             </p>
             <p>
-              <strong>Hours:</strong> Monday-Friday, 8:00 AM - 5:00 PM
+              <strong>Hours:</strong> Monday-Friday, 8:00 AM - 12:00 PM & 1:00
+              PM - 5:00 PM
             </p>
           </div>
         </div>
@@ -4399,7 +5129,7 @@ function LoanDetailsScreen({
             <button
               onClick={() =>
                 alert(
-                  "Contact Information:\n\nRetirement Plan Office\nEmail: rpo@cpu.edu.ph\nPhone: (033) 329-1971\nOffice Hours: Monday-Friday, 8:00 AM - 5:00 PM"
+                  "Contact Information:\n\nRetirement Plan Office\nEmail: rpo@cpu.edu.ph\nPhone: (033) 329-1971\nOffice Hours: Monday-Friday, 8:00 AM - 12:00 PM & 1:00 PM - 5:00 PM"
                 )
               }
               className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition"
