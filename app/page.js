@@ -345,14 +345,29 @@ const mockEligibleLoans = [
     eligible: true,
     type: "Regular",
     icon: Briefcase,
-    minAmount: 10000,
-    maxAmount: 500000,
+    minAmount: 1000,
+    maxAmount: 600000,
+    maxAmountNotes: "",
     minEquityRequired: 50000,
-    minTenureMonths: 12,
-    interestRate: "1.2% per month",
-    termOptions: ["1 year", "2 years", "3 years"],
+    minTenureMonths: 12, // Based on 1 year minimum for 5-9 months membership
+    interestRate: "7%",
+    interestRateTypeDescription:
+      "per annum, calculated based on the diminishing principal balance",
+    minTermDescription: "1 year (for 5-9 mos. membership)",
+    maxTermDescription: "6 years (for 20+ years membership)",
+    termOptions: [
+      "1 year",
+      "2 years",
+      "3 years",
+      "4 years",
+      "5 years",
+      "6 years",
+    ],
+    validationRulesNotes: "Refer to Key Regular Loan Conditions",
+    otherConditionsNotes:
+      "Refer to Key Regular Loan Conditions below. Proposed amounts input must be in denominations of 1000s.",
     applicationRequirements: {
-      sssNumber: true,
+      sssNumber: false,
       tinNumber: true,
       schoolIdFront: true,
       schoolIdBack: true,
@@ -374,19 +389,26 @@ const mockEligibleLoans = [
     eligible: true,
     type: "Special",
     icon: Star,
-    minAmount: 5000,
-    maxAmount: 300000,
+    minAmount: 1000,
+    maxAmount: 20000,
+    maxAmountNotes: "",
     minEquityRequired: 30000,
     minTenureMonths: 6,
-    interestRate: "1.0% per month",
-    termOptions: ["6 months", "1 year", "18 months"],
+    interestRate: "7%",
+    interestRateTypeDescription: "per annum, diminishing",
+    minTermDescription: "6 months (fixed)",
+    maxTermDescription: "6 months (fixed)",
+    termOptions: ["6 months"],
+    validationRulesNotes: "Refer to Key Special Loan Conditions",
+    otherConditionsNotes:
+      "Proposed amounts input must be in denominations of 1000s.",
     applicationRequirements: {
       sssNumber: false,
-      tinNumber: false,
-      schoolIdFront: true,
-      schoolIdBack: true,
-      govIdFront: true,
-      govIdBack: true,
+      tinNumber: true,
+      schoolIdFront: false,
+      schoolIdBack: false,
+      govIdFront: false,
+      govIdBack: false,
       proposedAmount: true,
       reason: true,
       signature: true,
@@ -403,12 +425,20 @@ const mockEligibleLoans = [
     eligible: true,
     type: "Emergency",
     icon: HelpCircle,
-    minAmount: 2000,
-    maxAmount: 100000,
+    minAmount: 1000,
+    maxAmount: 70000,
+    maxAmountNotes: "depending on years of membership",
     minEquityRequired: 10000,
-    minTenureMonths: 3,
-    interestRate: "1.5% per month",
-    termOptions: ["3 months", "6 months"],
+    minTenureMonths: 24, // Based on 2 years fixed term
+    interestRate: "7%",
+    interestRateTypeDescription:
+      "per annum, calculated based on the diminishing principal balance",
+    minTermDescription: "2 years (fixed)",
+    maxTermDescription: "2 years (fixed)",
+    termOptions: ["2 years"],
+    validationRulesNotes: "Refer to Key Emergency Loan Conditions",
+    otherConditionsNotes:
+      "Refer to Key Emergency Loan Conditions. Proposed amounts input must be in denominations of 1000s.",
     applicationRequirements: {
       sssNumber: false,
       tinNumber: false,
@@ -432,14 +462,24 @@ const mockEligibleLoans = [
     eligible: true,
     type: "Car",
     icon: Car,
-    minAmount: 50000,
-    maxAmount: 1500000,
+    minAmount: 1000,
+    maxAmount: 1000000,
+    maxAmountNotes: "",
     minEquityRequired: 100000,
-    minTenureMonths: 24,
-    interestRate: "Contact office for current rates",
-    termOptions: ["2 years", "3 years", "5 years"],
+    minTenureMonths: 120, // Based on minimum 10 years of membership
+    interestRate: "8%",
+    interestRateTypeDescription: "add on rate per annum",
+    minTermDescription: "6 years (fixed)",
+    maxTermDescription: "6 years (fixed)",
+    termOptions: ["6 years"],
+    validationRulesNotes: "Minimum 10 years of membership.",
+    otherConditionsNotes:
+      "Proposed amounts input must be in denominations of 1000s.",
     applicationRequirements: {
       officeVisitRequired: true,
+      proposedAmount: true,
+      reason: true,
+      signature: true,
     },
     eligibilityMessage: "",
     canApplyOnline: false,
@@ -455,14 +495,24 @@ const mockEligibleLoans = [
     eligible: true,
     type: "Motorcycle",
     icon: Bike,
-    minAmount: 20000,
-    maxAmount: 500000,
+    minAmount: 1000,
+    maxAmount: 150000,
+    maxAmountNotes: "",
     minEquityRequired: 40000,
-    minTenureMonths: 12,
-    interestRate: "Contact office for current rates",
-    termOptions: ["1 year", "2 years", "3 years"],
+    minTenureMonths: 120, // Based on minimum 10 years of membership
+    interestRate: "8%",
+    interestRateTypeDescription: "add on rate per annum",
+    minTermDescription: "3 years (fixed)",
+    maxTermDescription: "3 years (fixed)",
+    termOptions: ["3 years"],
+    validationRulesNotes: "Minimum 10 years of membership.",
+    otherConditionsNotes:
+      "Proposed amounts input must be in denominations of 1000s.",
     applicationRequirements: {
       officeVisitRequired: true,
+      proposedAmount: true,
+      reason: true,
+      signature: true,
     },
     eligibilityMessage: "",
     canApplyOnline: false,
@@ -478,12 +528,20 @@ const mockEligibleLoans = [
     eligible: true,
     type: "ShortTerm",
     icon: Clock,
-    minAmount: 1000,
-    maxAmount: 50000,
+    minAmount: 5000,
+    maxAmount: 5000,
+    maxAmountNotes: "",
     minEquityRequired: 5000,
-    minTenureMonths: 1,
-    interestRate: "2.0% per month",
-    termOptions: ["1 month", "2 months", "3 months"],
+    minTenureMonths: 36, // Based on minimum 3 years of membership
+    interestRate: "2%",
+    interestRateTypeDescription: "add on rate per month",
+    minTermDescription: "3 months (fixed)",
+    maxTermDescription: "3 months (fixed)",
+    termOptions: ["3 months"],
+    validationRulesNotes:
+      "Minimum 3 years of membership. Refer to Key Short Term Loan Conditions",
+    otherConditionsNotes:
+      "Proposed amounts input must be in denominations of 1000s.",
     applicationRequirements: {
       sssNumber: false,
       tinNumber: false,
@@ -2422,6 +2480,128 @@ const FormInputField = ({
   </div>
 );
 
+// Specialized Amount Input Component for Loan Applications
+const AmountInputField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  error,
+  minAmount,
+  maxAmount,
+}) => {
+  const formatNumberWithCommas = (num) => {
+    if (!num) return "";
+    return Number(num).toLocaleString();
+  };
+
+  const handleInputChange = (e) => {
+    let inputValue = e.target.value;
+
+    // Allow empty input
+    if (inputValue === "") {
+      onChange("");
+      return;
+    }
+
+    // Remove any non-numeric characters
+    inputValue = inputValue.replace(/[^\d]/g, "");
+
+    // Convert to number
+    const numValue = Number(inputValue);
+
+    // Update the parent component with the raw number
+    onChange(numValue);
+  };
+
+  const handleBlur = () => {
+    // When user leaves the field, round to nearest 1000 if it's not already
+    if (value && !validateAmountDenomination(value)) {
+      const rounded = Math.round(Number(value) / 1000) * 1000;
+      if (rounded > 0) {
+        onChange(rounded);
+      }
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    // Allow: backspace, delete, tab, escape, enter
+    if (
+      [46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (e.keyCode === 65 && e.ctrlKey === true) ||
+      (e.keyCode === 67 && e.ctrlKey === true) ||
+      (e.keyCode === 86 && e.ctrlKey === true) ||
+      (e.keyCode === 88 && e.ctrlKey === true)
+    ) {
+      return;
+    }
+    // Ensure that it is a number and stop the keypress
+    if (
+      (e.shiftKey || e.keyCode < 48 || e.keyCode > 57) &&
+      (e.keyCode < 96 || e.keyCode > 105)
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  const getStepValue = () => {
+    return 1000; // Always step by 1000
+  };
+
+  const getFormattedValue = () => {
+    if (value === "" || value === null || value === undefined) return "";
+    // For number inputs, we need to return the raw number, not formatted
+    return value;
+  };
+
+  return (
+    <div className="w-full">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <span className="text-gray-500 sm:text-sm">₱</span>
+        </div>
+        <input
+          type="number"
+          value={getFormattedValue()}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          step={getStepValue()}
+          min={minAmount}
+          max={maxAmount}
+          className={`w-full pl-8 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
+        />
+      </div>
+      <div className="mt-1 space-y-1">
+        <div className="flex justify-between items-center">
+          <p className="text-xs text-gray-500">
+            Amount must be in thousands (₱1,000, ₱2,000, etc.)
+          </p>
+          {value && !validateAmountDenomination(value) && (
+            <p className="text-xs text-orange-500">
+              Will round to ₱{Math.round(Number(value) / 1000) * 1000}
+            </p>
+          )}
+        </div>
+        {minAmount && maxAmount && (
+          <p className="text-xs text-gray-400">
+            Range: ₱{minAmount.toLocaleString()} - ₱{maxAmount.toLocaleString()}
+          </p>
+        )}
+      </div>
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  );
+};
+
 const FormTextArea = ({
   label,
   value,
@@ -2688,114 +2868,19 @@ function LoanApplicationFormScreen({
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 space-y-6">
-        {/* SSS Number - Only for Regular Loans */}
-        {requirements.sssNumber && (
-          <FormInputField
-            label="SSS Number"
-            value={formData.sssNumber}
-            onChange={(value) => handleInputChange("sssNumber", value)}
-            placeholder="XX-XXXXXXX-X"
-            required={true}
-            error={errors.sssNumber}
-          />
-        )}
-
-        {/* TIN Number - Only for Regular Loans */}
-        {requirements.tinNumber && (
-          <FormInputField
-            label="TIN Number"
-            value={formData.tinNumber}
-            onChange={(value) => handleInputChange("tinNumber", value)}
-            placeholder="XXX-XXX-XXX-XXX"
-            required={true}
-            error={errors.tinNumber}
-          />
-        )}
-
-        {/* ID Upload Section - For Regular and Special Loans */}
-        {(requirements.schoolIdFront || requirements.govIdFront) && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              ID Document Uploads
-            </h3>
-            <div className="grid grid-cols-1 gap-4">
-              {requirements.schoolIdFront && (
-                <FileUploadComponent
-                  label="School ID (Front)"
-                  fileName={files.schoolIdFront?.name}
-                  onFileChange={(file) =>
-                    handleFileChange("schoolIdFront", file)
-                  }
-                  required={true}
-                />
-              )}
-
-              {requirements.schoolIdBack && (
-                <FileUploadComponent
-                  label="School ID (Back)"
-                  fileName={files.schoolIdBack?.name}
-                  onFileChange={(file) =>
-                    handleFileChange("schoolIdBack", file)
-                  }
-                  required={true}
-                />
-              )}
-
-              {requirements.govIdFront && (
-                <FileUploadComponent
-                  label="Government ID (Front)"
-                  fileName={files.govIdFront?.name}
-                  onFileChange={(file) => handleFileChange("govIdFront", file)}
-                  required={true}
-                />
-              )}
-
-              {requirements.govIdBack && (
-                <FileUploadComponent
-                  label="Government ID (Back)"
-                  fileName={files.govIdBack?.name}
-                  onFileChange={(file) => handleFileChange("govIdBack", file)}
-                  required={true}
-                />
-              )}
-            </div>
-            {(errors.schoolIdFront ||
-              errors.schoolIdBack ||
-              errors.govIdFront ||
-              errors.govIdBack) && (
-              <p className="text-red-500 text-sm mt-2">
-                Please upload all required ID documents
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Proposed Amount - All loan types */}
-        <FormInputField
-          label={`Proposed Amount (₱)`}
-          type="number"
+        {/* 1. Proposed Amount - All loan types */}
+        <AmountInputField
+          label="Proposed Amount"
           value={formData.proposedAmount}
           onChange={(value) => handleInputChange("proposedAmount", value)}
-          placeholder="Enter amount in pesos"
+          placeholder="Enter amount (e.g., 15000)"
           required={true}
           error={errors.proposedAmount}
+          minAmount={loanType.minAmount}
+          maxAmount={loanType.maxAmount}
         />
 
-        {/* Amount Guidelines */}
-        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
-          <p>
-            <strong>Amount Guidelines:</strong>
-          </p>
-          <p>• Minimum: ₱{loanType.minAmount.toLocaleString()}</p>
-          <p>• Maximum: ₱{loanType.maxAmount.toLocaleString()}</p>
-          {loanType.userMaxLoanable && (
-            <p>
-              • Your Max Loanable: ₱{loanType.userMaxLoanable.toLocaleString()}
-            </p>
-          )}
-        </div>
-
-        {/* Reason for Loan - All loan types */}
+        {/* 2. Reason for Loan - All loan types */}
         <FormTextArea
           label="Reason for Loan"
           value={formData.reason}
@@ -2806,7 +2891,103 @@ function LoanApplicationFormScreen({
           rows={4}
         />
 
-        {/* Digital Signature - All loan types */}
+        {/* 3. Document Uploads Section (if required) */}
+        {(requirements.sssNumber ||
+          requirements.tinNumber ||
+          requirements.schoolIdFront ||
+          requirements.govIdFront) && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Required Documents
+            </h3>
+            <div className="space-y-4">
+              {/* SSS Number - Only for Regular Loans */}
+              {requirements.sssNumber && (
+                <FormInputField
+                  label="SSS Number"
+                  value={formData.sssNumber}
+                  onChange={(value) => handleInputChange("sssNumber", value)}
+                  placeholder="XX-XXXXXXX-X"
+                  required={true}
+                  error={errors.sssNumber}
+                />
+              )}
+
+              {/* TIN Number - Only for Regular Loans */}
+              {requirements.tinNumber && (
+                <FormInputField
+                  label="TIN Number"
+                  value={formData.tinNumber}
+                  onChange={(value) => handleInputChange("tinNumber", value)}
+                  placeholder="XXX-XXX-XXX-XXX"
+                  required={true}
+                  error={errors.tinNumber}
+                />
+              )}
+
+              {/* ID Upload Section */}
+              {(requirements.schoolIdFront || requirements.govIdFront) && (
+                <div className="grid grid-cols-1 gap-4">
+                  {requirements.schoolIdFront && (
+                    <FileUploadComponent
+                      label="School ID (Front)"
+                      fileName={files.schoolIdFront?.name}
+                      onFileChange={(file) =>
+                        handleFileChange("schoolIdFront", file)
+                      }
+                      required={true}
+                    />
+                  )}
+
+                  {requirements.schoolIdBack && (
+                    <FileUploadComponent
+                      label="School ID (Back)"
+                      fileName={files.schoolIdBack?.name}
+                      onFileChange={(file) =>
+                        handleFileChange("schoolIdBack", file)
+                      }
+                      required={true}
+                    />
+                  )}
+
+                  {requirements.govIdFront && (
+                    <FileUploadComponent
+                      label="Government ID (Front)"
+                      fileName={files.govIdFront?.name}
+                      onFileChange={(file) =>
+                        handleFileChange("govIdFront", file)
+                      }
+                      required={true}
+                    />
+                  )}
+
+                  {requirements.govIdBack && (
+                    <FileUploadComponent
+                      label="Government ID (Back)"
+                      fileName={files.govIdBack?.name}
+                      onFileChange={(file) =>
+                        handleFileChange("govIdBack", file)
+                      }
+                      required={true}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+            {(errors.sssNumber ||
+              errors.tinNumber ||
+              errors.schoolIdFront ||
+              errors.schoolIdBack ||
+              errors.govIdFront ||
+              errors.govIdBack) && (
+              <p className="text-red-500 text-sm mt-2">
+                Please complete all required document fields
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* 4. Digital Signature - All loan types */}
         <div>
           <SignatureCapture
             signature={formData.signature}
@@ -4055,6 +4236,15 @@ function calculateUserTenureMonths(currentUser) {
     (currentDate.getFullYear() - membershipDate.getFullYear()) * 12 +
     (currentDate.getMonth() - membershipDate.getMonth());
   return Math.max(0, monthsDiff);
+}
+
+// Global amount validation function for denomination requirements
+function validateAmountDenomination(amount) {
+  // Convert to number if it's a string
+  const numAmount = Number(amount);
+
+  // Check if it's a valid positive number and divisible by 1000
+  return !isNaN(numAmount) && numAmount > 0 && numAmount % 1000 === 0;
 }
 
 function checkLoanEligibility(loan, currentUser, currentEquity) {
