@@ -242,6 +242,9 @@ const mockLoanBreakdown = [
     principalAmortization: 2420,
     interestPaid: 180,
     remainingBalance: 55180,
+    // Payment discrepancy example - actual payment less than scheduled
+    scheduledTotalAmount: 2600,
+    actualTotalPaid: 2100,
   },
   {
     paymentDate: "2023-04-20",
@@ -254,6 +257,9 @@ const mockLoanBreakdown = [
     principalAmortization: 2460,
     interestPaid: 140,
     remainingBalance: 50280,
+    // Payment discrepancy example - scheduled vs actual amounts
+    scheduledTotalAmount: 2600,
+    actualTotalPaid: 2350,
   },
   {
     paymentDate: "2023-06-20",
@@ -1928,22 +1934,24 @@ const InfoRow = ({ label, value, isEmphasized = false }) => (
   </div>
 );
 
-// 7. Loan Payments Modal (formerly Loan Breakdown Modal)
+// 7. Loan Payments Modal (overhauled with tabs and payment discrepancy features)
 function LoanPaymentsModal({ loan, onClose }) {
-  const [selectedFilter, setSelectedFilter] = useState("all");
+  // State management for tabs and filtering
+  const [activeTab, setActiveTab] = useState("amortization"); // New tab state
+  const [selectedFilter, setSelectedFilter] = useState("thisYear"); // Changed default to "thisYear"
   const [filteredPayments, setFilteredPayments] = useState(mockLoanBreakdown);
 
-  // Predefined filter options for mobile-friendly experience
+  // Filter options for dropdown (converted from buttons)
   const filterOptions = [
-    { key: "all", label: "All Payments", icon: "📋" },
-    { key: "completed", label: "Completed Only", icon: "✅" },
-    { key: "projected", label: "Projected Only", icon: "🔮" },
-    { key: "last3months", label: "Last 3 Months", icon: "📅" },
-    { key: "thisYear", label: "This Year", icon: "🗓️" },
-    { key: "nextYear", label: "Next Year", icon: "⏭️" },
+    { key: "all", label: "View All" }, // Changed from "All Payments"
+    { key: "completed", label: "Completed Only" },
+    { key: "projected", label: "Projected Only" }, // Will be "Amortization Schedule" in tab
+    { key: "last3months", label: "Last 3 Months" },
+    { key: "thisYear", label: "This Year" },
+    { key: "nextYear", label: "Next Year" },
   ];
 
-  // Filter payments based on selected option
+  // Filter payments based on selected option (applies only to Amortization Schedule tab)
   useEffect(() => {
     let filtered = mockLoanBreakdown;
     const now = new Date();
@@ -1990,17 +1998,32 @@ function LoanPaymentsModal({ loan, onClose }) {
     setFilteredPayments(filtered);
   }, [selectedFilter]);
 
+  // Helper function to check if payment has discrepancy
+  const hasPaymentDiscrepancy = (payment) => {
+    return (
+      payment.scheduledTotalAmount &&
+      payment.actualTotalPaid &&
+      payment.actualTotalPaid < payment.scheduledTotalAmount &&
+      !payment.isProjected
+    );
+  };
+
+  // Helper function to calculate remaining amount for discrepancy
+  const calculateRemaining = (payment) => {
+    return payment.scheduledTotalAmount - payment.actualTotalPaid;
+  };
+
   const completedPayments = filteredPayments.filter((p) => !p.isProjected);
   const projectedPayments = filteredPayments.filter((p) => p.isProjected);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50">
       <div className="bg-white w-full max-h-[95vh] flex flex-col rounded-t-2xl">
-        {/* Mobile-optimized header */}
+        {/* Enhanced header with new title */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 rounded-t-2xl">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-800">
-              Payment Schedule
+              Loan Amortization & Payments
             </h2>
             <p className="text-sm text-gray-600">{loan.loanCode}</p>
           </div>
@@ -2012,151 +2035,273 @@ function LoanPaymentsModal({ loan, onClose }) {
           </button>
         </div>
 
+        {/* New Tabbed Interface */}
+        <div className="border-b border-gray-200 bg-white">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab("amortization")}
+              className={`flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "amortization"
+                  ? "border-blue-500 text-blue-600 bg-blue-50"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Amortization Schedule
+            </button>
+            <button
+              onClick={() => setActiveTab("payments")}
+              className={`flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "payments"
+                  ? "border-blue-500 text-blue-600 bg-blue-50"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Payments
+            </button>
+          </div>
+        </div>
+
         <div className="flex-1 overflow-y-auto">
-          {/* Auto-deduction info */}
-          <div className="p-4 bg-blue-50 border-b border-blue-100">
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                <CalendarDays size={16} className="text-blue-600" />
+          {/* Tab Content */}
+          {activeTab === "amortization" ? (
+            <>
+              {/* Auto-deduction info */}
+              <div className="p-4 bg-blue-50 border-b border-blue-100">
+                <div className="flex items-start">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                    <CalendarDays size={16} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 mb-1">
+                      Automatic Deductions
+                    </p>
+                    <p className="text-xs text-blue-700 leading-relaxed">
+                      Payments are automatically deducted from your salary.
+                      Schedule shows completed and projected payments.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-blue-800 mb-1">
-                  Automatic Deductions
-                </p>
-                <p className="text-xs text-blue-700 leading-relaxed">
-                  Payments are automatically deducted from your salary. Schedule
-                  shows completed and projected payments.
-                </p>
-              </div>
-            </div>
-          </div>
 
-          {/* Mobile-friendly filter buttons */}
-          <div className="p-4 bg-white border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Filter Payments
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {filterOptions.map((option) => (
-                <button
-                  key={option.key}
-                  onClick={() => setSelectedFilter(option.key)}
-                  className={`p-3 rounded-lg text-sm font-medium transition-all ${
-                    selectedFilter === option.key
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  <span className="mr-2">{option.icon}</span>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-            {selectedFilter !== "all" && (
-              <p className="text-xs text-gray-600 mt-2 text-center">
-                Showing {filteredPayments.length} of {mockLoanBreakdown.length}{" "}
-                payments
-              </p>
-            )}
-          </div>
-
-          {/* Mobile-optimized payment list */}
-          <div className="p-4">
-            {filteredPayments.length > 0 ? (
-              <div className="space-y-3">
-                {filteredPayments.map((payment, index) => (
-                  <div
-                    key={index}
-                    className={`p-4 rounded-lg border-2 ${
-                      payment.isProjected
-                        ? "border-yellow-200 bg-yellow-50"
-                        : "border-green-200 bg-green-50"
-                    }`}
+              {/* Filter dropdown (replaces button grid) */}
+              <div className="p-4 bg-white border-b border-gray-100">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-gray-700">
+                    Filter by:
+                  </label>
+                  <select
+                    value={selectedFilter}
+                    onChange={(e) => setSelectedFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    {/* Payment header */}
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {payment.paymentDate}
-                        </p>
-                        <span
-                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                            payment.isProjected
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-green-100 text-green-800"
+                    {filterOptions.map((option) => (
+                      <option key={option.key} value={option.key}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {selectedFilter !== "all" && (
+                  <p className="text-xs text-gray-600 text-center">
+                    Showing {filteredPayments.length} of{" "}
+                    {mockLoanBreakdown.length} payments
+                  </p>
+                )}
+              </div>
+
+              {/* Enhanced payment list with discrepancy detection */}
+              <div className="p-4">
+                {filteredPayments.length > 0 ? (
+                  <div className="space-y-3">
+                    {filteredPayments.map((payment, index) => {
+                      const hasDiscrepancy = hasPaymentDiscrepancy(payment);
+                      const remaining = hasDiscrepancy
+                        ? calculateRemaining(payment)
+                        : 0;
+
+                      return (
+                        <div
+                          key={index}
+                          className={`p-4 rounded-lg border-2 ${
+                            hasDiscrepancy
+                              ? "border-red-300 bg-red-50" // Highlight discrepancies
+                              : payment.isProjected
+                              ? "border-yellow-200 bg-yellow-50"
+                              : "border-green-200 bg-green-50"
                           }`}
                         >
-                          {payment.isProjected
-                            ? "🔮 Projected"
-                            : "✅ Completed"}
-                        </span>
-                      </div>
-                    </div>
+                          {/* Payment header */}
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <p className="font-medium text-gray-800">
+                                {payment.paymentDate}
+                              </p>
+                              <div className="flex gap-2 mt-1">
+                                <span
+                                  className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                    payment.isProjected
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-green-100 text-green-800"
+                                  }`}
+                                >
+                                  {payment.isProjected
+                                    ? "🔮 Projected"
+                                    : "✅ Completed"}
+                                </span>
+                                {hasDiscrepancy && (
+                                  <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    ⚠️ Payment Shortfall
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
 
-                    {/* Payment details grid */}
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="bg-white p-2 rounded border">
-                        <p className="text-xs text-gray-600 mb-1">
-                          Principal Amortization
-                        </p>
-                        <p className="font-semibold text-blue-600">
-                          ₱{payment.principalAmortization.toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="bg-white p-2 rounded border">
-                        <p className="text-xs text-gray-600 mb-1">
-                          Interest Paid
-                        </p>
-                        <p className="font-semibold text-green-600">
-                          ₱{payment.interestPaid.toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="col-span-2 bg-white p-2 rounded border">
-                        <p className="text-xs text-gray-600 mb-1">
-                          Remaining Balance
-                        </p>
-                        <p className="font-bold text-gray-800">
-                          ₱{payment.remainingBalance.toLocaleString()}
-                        </p>
-                      </div>
+                          {/* Payment discrepancy details (if applicable) */}
+                          {hasDiscrepancy && (
+                            <div className="mb-3 p-3 bg-white border border-red-200 rounded-lg">
+                              <h4 className="text-xs font-semibold text-red-800 mb-2">
+                                Payment Discrepancy Details:
+                              </h4>
+                              <div className="space-y-1 text-xs">
+                                <p>
+                                  <span className="text-gray-600">
+                                    Scheduled Amortization:
+                                  </span>{" "}
+                                  <span className="font-medium">
+                                    ₱
+                                    {payment.scheduledTotalAmount.toLocaleString()}
+                                  </span>
+                                </p>
+                                <p>
+                                  <span className="text-gray-600">
+                                    Actual Payment Made:
+                                  </span>{" "}
+                                  <span className="font-medium">
+                                    ₱{payment.actualTotalPaid.toLocaleString()}
+                                  </span>
+                                </p>
+                                <p>
+                                  <span className="text-gray-600">
+                                    Remaining for this period:
+                                  </span>{" "}
+                                  <span className="font-semibold text-red-600">
+                                    ₱{remaining.toLocaleString()}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Standard payment details grid */}
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="bg-white p-2 rounded border">
+                              <p className="text-xs text-gray-600 mb-1">
+                                Principal Amortization
+                              </p>
+                              <p className="font-semibold text-blue-600">
+                                ₱
+                                {payment.principalAmortization.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-white p-2 rounded border">
+                              <p className="text-xs text-gray-600 mb-1">
+                                Interest Paid
+                              </p>
+                              <p className="font-semibold text-green-600">
+                                ₱{payment.interestPaid.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="col-span-2 bg-white p-2 rounded border">
+                              <p className="text-xs text-gray-600 mb-1">
+                                Remaining Balance
+                              </p>
+                              <p className="font-bold text-gray-800">
+                                ₱{payment.remainingBalance.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Search size={24} className="text-gray-400" />
+                    </div>
+                    <p className="text-gray-600 mb-1">No payments found</p>
+                    <p className="text-sm text-gray-500">
+                      Try a different filter option
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Summary stats for mobile */}
+              {filteredPayments.length > 0 && (
+                <div className="p-4 bg-gray-50 border-t border-gray-200">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 bg-white rounded-lg border">
+                      <p className="text-lg font-bold text-blue-600">
+                        {completedPayments.length}
+                      </p>
+                      <p className="text-xs text-gray-600">Completed</p>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg border">
+                      <p className="text-lg font-bold text-yellow-600">
+                        {projectedPayments.length}
+                      </p>
+                      <p className="text-xs text-gray-600">Projected</p>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg border">
+                      <p className="text-lg font-bold text-gray-800">
+                        {filteredPayments.length}
+                      </p>
+                      <p className="text-xs text-gray-600">Total</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
+                </div>
+              )}
+            </>
+          ) : (
+            /* Payments Tab - Simplified view */
+            <div className="p-4">
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Search size={24} className="text-gray-400" />
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <DollarSign size={24} className="text-blue-600" />
                 </div>
-                <p className="text-gray-600 mb-1">No payments found</p>
-                <p className="text-sm text-gray-500">
-                  Try a different filter option
+                <h3 className="text-lg font-medium text-gray-800 mb-2">
+                  Simplified Payment Summary
+                </h3>
+                <p className="text-gray-600 text-sm mb-6">
+                  Simplified payment summary view will be available here.
                 </p>
-              </div>
-            )}
-          </div>
 
-          {/* Summary stats for mobile */}
-          {filteredPayments.length > 0 && (
-            <div className="p-4 bg-gray-50 border-t border-gray-200">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-3 bg-white rounded-lg border">
-                  <p className="text-lg font-bold text-blue-600">
-                    {completedPayments.length}
-                  </p>
-                  <p className="text-xs text-gray-600">Completed</p>
-                </div>
-                <div className="text-center p-3 bg-white rounded-lg border">
-                  <p className="text-lg font-bold text-yellow-600">
-                    {projectedPayments.length}
-                  </p>
-                  <p className="text-xs text-gray-600">Projected</p>
-                </div>
-                <div className="text-center p-3 bg-white rounded-lg border">
-                  <p className="text-lg font-bold text-gray-800">
-                    {filteredPayments.length}
-                  </p>
-                  <p className="text-xs text-gray-600">Total</p>
+                {/* Basic payment summary for now */}
+                <div className="bg-white p-4 rounded-lg border border-gray-200 text-left max-w-sm mx-auto">
+                  <h4 className="font-medium text-gray-700 mb-3">
+                    Quick Summary:
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {mockLoanBreakdown.slice(0, 3).map((payment, index) => (
+                      <div key={index} className="flex justify-between">
+                        <span className="text-gray-600">
+                          {payment.paymentDate}:
+                        </span>
+                        <span className="font-medium">
+                          ₱
+                          {(
+                            payment.principalAmortization + payment.interestPaid
+                          ).toLocaleString()}
+                          {payment.isProjected && " (proj.)"}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t border-gray-200 text-xs text-gray-500">
+                      ... and {mockLoanBreakdown.length - 3} more payments
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2169,7 +2314,7 @@ function LoanPaymentsModal({ loan, onClose }) {
             onClick={onClose}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-md"
           >
-            Close Payment Schedule
+            Close Loan Details
           </button>
         </div>
       </div>
