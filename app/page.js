@@ -373,7 +373,7 @@ const mockEligibleLoans = [
     ],
     validationRulesNotes: "Refer to Key Regular Loan Conditions",
     otherConditionsNotes:
-      "Refer to Key Regular Loan Conditions below. Proposed amounts input must be in denominations of 1000s.",
+      "Refer to Key Regular Loan Conditions below. Amount applied for input must be in denominations of 1000s.",
     applicationRequirements: {
       sssNumber: false,
       tinNumber: true,
@@ -409,7 +409,7 @@ const mockEligibleLoans = [
     termOptions: ["6 months"],
     validationRulesNotes: "Refer to Key Special Loan Conditions",
     otherConditionsNotes:
-      "Proposed amounts input must be in denominations of 1000s.",
+      "Amount applied for input must be in denominations of 1000s.",
     applicationRequirements: {
       sssNumber: false,
       tinNumber: true,
@@ -446,7 +446,7 @@ const mockEligibleLoans = [
     termOptions: ["2 years"],
     validationRulesNotes: "Refer to Key Emergency Loan Conditions",
     otherConditionsNotes:
-      "Refer to Key Emergency Loan Conditions. Proposed amounts input must be in denominations of 1000s.",
+      "Refer to Key Emergency Loan Conditions. Amount applied for input must be in denominations of 1000s.",
     applicationRequirements: {
       sssNumber: false,
       tinNumber: false,
@@ -482,7 +482,7 @@ const mockEligibleLoans = [
     termOptions: ["6 years"],
     validationRulesNotes: "Minimum 10 years of membership.",
     otherConditionsNotes:
-      "Proposed amounts input must be in denominations of 1000s.",
+      "Amount applied for input must be in denominations of 1000s.",
     applicationRequirements: {
       officeVisitRequired: true,
       proposedAmount: true,
@@ -515,7 +515,7 @@ const mockEligibleLoans = [
     termOptions: ["3 years"],
     validationRulesNotes: "Minimum 10 years of membership.",
     otherConditionsNotes:
-      "Proposed amounts input must be in denominations of 1000s.",
+      "Amount applied for input must be in denominations of 1000s.",
     applicationRequirements: {
       officeVisitRequired: true,
       proposedAmount: true,
@@ -549,7 +549,7 @@ const mockEligibleLoans = [
     validationRulesNotes:
       "Minimum 3 years of membership. Refer to Key Short Term Loan Conditions",
     otherConditionsNotes:
-      "Proposed amounts input must be in denominations of 1000s.",
+      "Amount applied for input must be in denominations of 1000s.",
     applicationRequirements: {
       sssNumber: false,
       tinNumber: false,
@@ -1804,12 +1804,7 @@ function HomeScreen({ navigate, setSelectedLoan, currentUser }) {
                     </span>{" "}
                     (as of {loan.outstandingLoanDate})
                   </p>
-                  <p className="text-sm text-gray-600">
-                    Repayment:{" "}
-                    <span className="font-medium text-gray-800">
-                      ₱{loan.repaymentAmount?.toLocaleString()}
-                    </span>
-                  </p>
+                  {/* Removed repayment information as requested */}
                   <button
                     onClick={() => handleSeeDetails(loan)}
                     className="mt-3 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition text-sm shadow-md hover:shadow-lg"
@@ -2799,6 +2794,8 @@ function LoanApplicationFormScreen({
   setErrorMessage,
   errorMessage,
 }) {
+  const [showDataPrivacyModal, setShowDataPrivacyModal] = useState(false);
+
   // Form state
   const [formData, setFormData] = useState({
     sssNumber: "",
@@ -2854,7 +2851,7 @@ function LoanApplicationFormScreen({
 
     // Common validations
     if (!formData.proposedAmount || formData.proposedAmount <= 0) {
-      newErrors.proposedAmount = "Please enter a valid proposed amount";
+      newErrors.proposedAmount = "Please enter a valid amount applied for";
     } else {
       const amount = parseFloat(formData.proposedAmount);
 
@@ -2864,7 +2861,7 @@ function LoanApplicationFormScreen({
         mockEquities.find((eq) => eq.userId === "user1")?.endingBalance
           ?.total || 0;
 
-      // Use enhanced eligibility check with proposed amount (works for all loan types)
+      // Use enhanced eligibility check with amount applied for (works for all loan types)
       const eligibilityResult = checkLoanEligibility(
         loanType,
         defaultMockUser,
@@ -2917,21 +2914,29 @@ function LoanApplicationFormScreen({
   };
 
   const handleSubmit = () => {
+    // First validate the form
     if (!validateForm()) {
-      setErrorMessage("Please fix the errors below before submitting.");
-      return;
+      return; // Stop if validation fails
     }
 
+    // Show Data Privacy Modal before proceeding with submission
+    setShowDataPrivacyModal(true);
+  };
+
+  const handleDataPrivacyAgree = () => {
+    setShowDataPrivacyModal(false);
+
+    // Clear any previous error messages
     setErrorMessage("");
 
-    // Create application object
+    // Create application object (original submission logic)
     const newApplication = {
       id: `app${Date.now()}`,
       userId: "user1", // This would be dynamic in real app
       type: loanType.name,
       submissionDate: new Date().toISOString().split("T")[0],
       status: "Pending Review",
-      proposedAmount: parseFloat(formData.proposedAmount),
+      amountAppliedFor: parseFloat(formData.proposedAmount), // Updated property name
       approvedAmount: null,
       adminNotes: "Awaiting initial assessment.",
       statusHistory: [
@@ -2958,6 +2963,10 @@ function LoanApplicationFormScreen({
 
     // Navigate to application status
     navigate("loanApplicationStatus");
+  };
+
+  const handleDataPrivacyCancel = () => {
+    setShowDataPrivacyModal(false);
   };
 
   const generateRequirementsList = () => {
@@ -3001,7 +3010,7 @@ function LoanApplicationFormScreen({
         date: new Date().toISOString().split("T")[0],
       });
     requirements.push({
-      item: "Proposed Amount & Reason",
+      item: "Amount Applied For & Reason",
       status: "Submitted",
       date: new Date().toISOString().split("T")[0],
     });
@@ -3017,9 +3026,9 @@ function LoanApplicationFormScreen({
   const requirements = loanType.applicationRequirements;
 
   return (
-    <div className="p-6 flex-grow bg-gray-50">
+    <div className="p-6 flex-grow bg-gray-50 overflow-y-auto">
       <PageHeader
-        title={`${loanType.name} Application`}
+        title={`Apply for ${loanType.name}`}
         onBack={() => navigate("loanApplications")}
       />
 
@@ -3121,16 +3130,16 @@ function LoanApplicationFormScreen({
       })()}
 
       <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 space-y-6">
-        {/* 1. Proposed Amount - All loan types */}
+        {/* 1. Amount Applied For - All loan types */}
         <AmountInputField
-          label="Proposed Amount"
+          label="Amount Applied For"
           value={formData.proposedAmount}
           onChange={(value) => handleInputChange("proposedAmount", value)}
-          placeholder="Enter amount (e.g., 15000)"
+          placeholder="Enter amount in ₱"
           required={true}
           error={errors.proposedAmount}
           minAmount={loanType.minAmount}
-          maxAmount={loanType.maxAmount}
+          maxAmount={loanType.maxAmount || currentEquity}
         />
 
         {/* 2. Reason for Loan - All loan types */}
@@ -3240,18 +3249,25 @@ function LoanApplicationFormScreen({
           </div>
         )}
 
-        {/* 4. Digital Signature - All loan types */}
+        {/* 4. Digital Signature */}
         <div>
           <SignatureCapture
             signature={formData.signature}
-            onSignatureChange={(signature) =>
-              handleInputChange("signature", signature)
+            onSignatureChange={(signatureData) =>
+              handleInputChange("signature", signatureData)
             }
           />
           {errors.signature && (
-            <p className="text-red-500 text-xs mt-1">{errors.signature}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.signature}</p>
           )}
         </div>
+
+        {/* Error Message Display */}
+        {errorMessage && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 text-sm">{errorMessage}</p>
+          </div>
+        )}
 
         {/* Regular Loan Additional Information */}
         {loanType.type === "Regular" && (
@@ -3330,6 +3346,13 @@ function LoanApplicationFormScreen({
           Submit {loanType.name} Application
         </button>
       </div>
+
+      {/* Data Privacy Modal */}
+      <DataPrivacyModal
+        isOpen={showDataPrivacyModal}
+        onAgree={handleDataPrivacyAgree}
+        onCancel={handleDataPrivacyCancel}
+      />
     </div>
   );
 }
@@ -3714,21 +3737,7 @@ function ProfileScreen({ navigate, currentUser, userEquities }) {
         </div>
       </div>
 
-      {/* Equity Statement Section */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-gray-700">
-            My Equity Statement
-          </h3>
-          <TrendingUp size={24} className="text-blue-500" />
-        </div>
-        <button
-          onClick={() => navigate("equity")}
-          className="w-full flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-md hover:shadow-lg"
-        >
-          <FileText size={18} className="mr-2" /> View Detailed Equity Statement
-        </button>
-      </div>
+      {/* Removed Equity Statement Section as requested */}
     </div>
   );
 }
@@ -4145,7 +4154,7 @@ function LoanApplicationStatusScreen({ navigate }) {
     <div className="p-6 flex-grow bg-gray-50">
       <PageHeader
         title="My Loan Applications"
-        onBack={() => navigate("loans")}
+        onBack={() => navigate("home")}
       />
 
       {userApplications.length > 0 ? (
@@ -4181,9 +4190,12 @@ function LoanApplicationStatusScreen({ navigate }) {
               {/* Application Details */}
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Proposed Amount:</span>
+                  <span className="text-gray-600">Amount Applied For:</span>
                   <span className="font-medium">
-                    ₱{app.proposedAmount.toLocaleString()}
+                    ₱
+                    {(
+                      app.amountAppliedFor || app.proposedAmount
+                    ).toLocaleString()}
                   </span>
                 </div>
                 {app.approvedAmount && (
@@ -4657,7 +4669,7 @@ function validateBaseLoanEligibility(
     };
   }
 
-  // 4. Validate proposed amount against available equity (universal)
+  // 4. Validate amount applied for against available equity (universal)
   if (proposedAmount !== null) {
     if (!validateAmountDenomination(proposedAmount)) {
       return {
@@ -4874,7 +4886,7 @@ function validateRegularLoanSpecific(
     };
   }
 
-  // 4. Validate proposed amount against tenure-based caps
+  // 4. Validate amount applied for against tenure-based caps
   if (proposedAmount !== null && proposedAmount > tenureCaps.maxLoanable) {
     return {
       ...baseCheck,
@@ -5027,6 +5039,88 @@ function validateMotorcycleLoanSpecific(
     dynamicMaxPaymentMonths: 36, // 3 years fixed
     dynamicMaxYearsPayment: 3,
   };
+}
+
+// Data Privacy Modal Component
+function DataPrivacyModal({ isOpen, onAgree, onCancel }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Data Privacy Consent
+          </h2>
+
+          <div className="text-sm text-gray-700 space-y-3 mb-6">
+            <p>
+              By selecting "Agree & Proceed", you acknowledge that you have
+              read, understood, and agree to the following terms regarding your
+              personal data in relation to this loan application:
+            </p>
+
+            <div className="space-y-2">
+              <p>
+                <strong>1. Collection and Use:</strong> The CPU Retirement Plan
+                Office will collect, use, and process the personal and sensitive
+                personal information you provide in this loan application form.
+              </p>
+
+              <p>
+                <strong>2. Purpose:</strong> This information will be used
+                exclusively for the purposes of evaluating your loan
+                eligibility, processing your loan application, managing your
+                loan (if approved), and for any other activities directly
+                related to servicing your loan transaction with the CPU
+                Retirement Plan Office.
+              </p>
+
+              <p>
+                <strong>3. Data Protection:</strong> Your data will be protected
+                and handled in compliance with the Data Privacy Act of 2012
+                (R.A. 10173) and the CPU Retirement Plan Office's internal Data
+                Privacy Policy.
+              </p>
+
+              <p>
+                <strong>4. Accuracy:</strong> You affirm that all information
+                you have provided is true, correct, and complete to the best of
+                your knowledge.
+              </p>
+
+              <p>
+                <strong>5. Further Information:</strong> For detailed
+                information on our data privacy practices, you may inquire with
+                the CPU Retirement Plan Office. (For this mockup, a direct link
+                to a policy document is not required but can be mentioned).
+              </p>
+            </div>
+
+            <p className="font-medium">
+              Do you consent to the collection and processing of your data under
+              these terms and wish to proceed with your loan application?
+            </p>
+          </div>
+
+          <div className="flex space-x-3">
+            <button
+              onClick={onCancel}
+              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-4 rounded-lg transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onAgree}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition"
+            >
+              Agree & Proceed
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default App;
